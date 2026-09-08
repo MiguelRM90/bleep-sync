@@ -1,0 +1,238 @@
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ShiftService } from '../../services/shift.service';
+import { Shift, ColleagueMetrics } from '../../models/shift.model';
+
+@Component({
+  selector: 'app-metrics-summary',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <section class="clinical-card p-5 transition-all">
+      <!-- Section Header with Tab Switcher -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-sm">
+            3
+          </span>
+          <div>
+            <h2 class="text-base font-semibold text-slate-100 tracking-tight">Historial y Métricas de Equidad</h2>
+            <p class="text-xs text-slate-400">Control de rotación y balance de buscas con cada adjunto</p>
+          </div>
+        </div>
+
+        <!-- View Tabs -->
+        <div class="flex p-1 bg-slate-900 rounded-xl border border-slate-800 self-start sm:self-auto">
+          <button
+            type="button"
+            (click)="activeTab.set('timeline')"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition tactile-btn"
+            [ngClass]="{
+              'bg-emerald-600 text-white shadow-sm': activeTab() === 'timeline',
+              'text-slate-400 hover:text-slate-200': activeTab() !== 'timeline'
+            }"
+          >
+            Historial ({{ shiftService.shifts().length }})
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('balance')"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition tactile-btn"
+            [ngClass]="{
+              'bg-emerald-600 text-white shadow-sm': activeTab() === 'balance',
+              'text-slate-400 hover:text-slate-200': activeTab() !== 'balance'
+            }"
+          >
+            Balance por Adjunto
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Timeline -->
+      @if (activeTab() === 'timeline') {
+        <div class="space-y-3">
+          @if (shiftService.sortedShifts().length === 0) {
+            <div class="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-xl">
+              <p class="text-sm">No hay guardias registradas todavía.</p>
+              <button
+                (click)="shiftService.seedInitialDemoData()"
+                class="mt-3 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-emerald-400 rounded-lg border border-slate-700 transition"
+              >
+                Cargar datos de prueba
+              </button>
+            </div>
+          } @else {
+            <div class="divide-y divide-slate-800/60 max-h-[480px] overflow-y-auto pr-1">
+              @for (shift of shiftService.sortedShifts(); track shift.id) {
+                <div class="py-3 first:pt-0 last:pb-0 flex items-start justify-between gap-3 group">
+                  <div class="space-y-1 flex-1">
+                    <!-- Date & Colleague -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-xs font-semibold text-slate-200">
+                        {{ shiftService.formatDisplayDate(shift.date) }}
+                      </span>
+                      <span class="text-xs text-slate-400 font-medium">con</span>
+                      <span class="text-xs font-bold text-slate-100 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60">
+                        {{ shift.colleague }}
+                      </span>
+                    </div>
+
+                    <!-- Notes if present -->
+                    @if (shift.notes) {
+                      <p class="text-xs text-slate-400 italic bg-slate-900/60 rounded-md p-1.5 border-l-2 border-slate-700">
+                        “{{ shift.notes }}”
+                      </p>
+                    }
+
+                    <!-- Sync Status Pill -->
+                    <div class="flex items-center gap-2 pt-0.5">
+                      @if (shift.syncStatus === 'synced') {
+                        <span class="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
+                          <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          Nube (Google Sheets)
+                        </span>
+                      } @else if (shift.syncStatus === 'pending') {
+                        <span class="inline-flex items-center gap-1 text-[10px] text-amber-400 font-medium">
+                          <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          Pendiente de sincronizar (Local)
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 text-[10px] text-rose-400 font-medium">
+                          <svg class="w-3 h-3 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                          </svg>
+                          Error al conectar
+                        </span>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Role Badge & Action -->
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2.5 py-1 rounded-lg text-xs font-extrabold border"
+                      [ngClass]="{
+                        'bg-sky-500/20 text-sky-300 border-sky-500/40': shift.role === 'Planta',
+                        'bg-emerald-500/20 text-emerald-300 border-emerald-500/40': shift.role === 'Urgencias',
+                        'bg-purple-500/20 text-purple-300 border-purple-500/40': shift.role === 'Ambos'
+                      }"
+                    >
+                      {{ shift.role }}
+                    </span>
+
+                    <!-- Delete shift button -->
+                    <button
+                      type="button"
+                      (click)="deleteShift(shift.id)"
+                      class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition opacity-60 hover:opacity-100"
+                      title="Eliminar registro"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Tab Content: Balance & Metrics -->
+      @if (activeTab() === 'balance') {
+        <div class="space-y-3">
+          @if (shiftService.metrics().length === 0) {
+            <p class="text-sm text-slate-500 text-center py-8">No hay suficientes datos para computar el balance.</p>
+          } @else {
+            <div class="space-y-3.5 max-h-[480px] overflow-y-auto pr-1">
+              @for (item of shiftService.metrics(); track item.colleague) {
+                <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                  <!-- Header: Name & Imbalance Warning -->
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h4 class="text-sm font-bold text-slate-100">{{ item.colleague }}</h4>
+                      <p class="text-[11px] text-slate-400">
+                        {{ item.totalShifts }} {{ item.totalShifts === 1 ? 'guardia' : 'guardias' }} juntos
+                        @if (item.lastShiftDate) {
+                          • Última: {{ shiftService.formatDisplayDate(item.lastShiftDate) }} ({{ item.lastRole }})
+                        }
+                      </p>
+                    </div>
+
+                    @if (item.imbalanceWarning) {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                        <svg class="w-3 h-3 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        Desbalance
+                      </span>
+                    } @else {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        Equilibrado
+                      </span>
+                    }
+                  </div>
+
+                  <!-- Visual Proportion Bar: Planta vs Urgencias -->
+                  <div class="space-y-1">
+                    <div class="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex">
+                      <div
+                        class="bg-sky-500 transition-all duration-500"
+                        [style.width.%]="item.plantaPercentage"
+                        [title]="'Planta: ' + item.plantaCount + ' (' + item.plantaPercentage + '%)'"
+                      ></div>
+                      <div
+                        class="bg-emerald-500 transition-all duration-500"
+                        [style.width.%]="item.urgenciasPercentage"
+                        [title]="'Urgencias: ' + item.urgenciasCount + ' (' + item.urgenciasPercentage + '%)'"
+                      ></div>
+                      <div
+                        class="bg-purple-500 transition-all duration-500"
+                        [style.width.%]="100 - (item.plantaPercentage + item.urgenciasPercentage)"
+                        [title]="'Ambos: ' + item.ambosCount"
+                      ></div>
+                    </div>
+
+                    <!-- Legend Numbers -->
+                    <div class="flex items-center justify-between text-[11px] text-slate-300 font-medium">
+                      <div class="flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 inline-block"></span>
+                        <span>Planta: <strong>{{ item.plantaCount }}</strong> ({{ item.plantaPercentage }}%)</span>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                        <span>Urgencias: <strong>{{ item.urgenciasCount }}</strong> ({{ item.urgenciasPercentage }}%)</span>
+                      </div>
+                      @if (item.ambosCount > 0) {
+                        <div class="flex items-center gap-1">
+                          <span class="w-2 h-2 rounded-full bg-purple-500 inline-block"></span>
+                          <span>Ambos: <strong>{{ item.ambosCount }}</strong></span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  `,
+})
+export class MetricsSummaryComponent {
+  readonly shiftService = inject(ShiftService);
+  readonly activeTab = signal<'timeline' | 'balance'>('timeline');
+
+  deleteShift(id: string): void {
+    if (confirm('¿Seguro que deseas eliminar este registro de guardia?')) {
+      this.shiftService.deleteShift(id);
+    }
+  }
+}
+

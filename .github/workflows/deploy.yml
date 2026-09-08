@@ -1,0 +1,58 @@
+name: Deploy BleepSync to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Build Angular PWA for GitHub Pages
+        run: |
+          npm run build:gh-pages
+          # SPA 404 fallback for GitHub Pages
+          if [ -d "dist/bleep-sync/browser" ]; then
+            cp dist/bleep-sync/browser/index.html dist/bleep-sync/browser/404.html
+          elif [ -d "dist/bleep-sync" ]; then
+            cp dist/bleep-sync/index.html dist/bleep-sync/404.html
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist/bleep-sync/browser'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="screenGrad512" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded card -->
+  <rect width="512" height="512" rx="112" fill="url(#bg512)"/>
+  <rect x="6" y="6" width="500" height="500" rx="106" fill="none" stroke="#334155" stroke-width="4" opacity="0.6"/>
+
+  <!-- Pager / Bleep device outline -->
+  <rect x="96" y="118" width="320" height="276" rx="48" fill="#1e293b" stroke="#38bdf8" stroke-width="8"/>
+  
+  <!-- Pager screen -->
+  <rect x="128" y="150" width="256" height="122" rx="20" fill="url(#screenGrad512)" stroke="#10b981" stroke-width="4"/>
+  
+  <!-- Pulse / ECG wave line inside screen -->
+  <path d="M144 211 L192 211 L206 174 L222 243 L238 197 L251 219 L262 211 L368 211" fill="none" stroke="#34d399" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Hospital Cross / Sync indicator -->
+  <circle cx="340" cy="180" r="10" fill="#34d399"/>
+
+  <!-- Tactical buttons on the pager -->
+  <rect x="138" y="304" width="64" height="48" rx="14" fill="#334155"/>
+  <circle cx="170" cy="328" r="8" fill="#94a3b8"/>
+
+  <rect x="224" y="304" width="64" height="48" rx="14" fill="#059669"/>
+  <circle cx="256" cy="328" r="8" fill="#a7f3d0"/>
+
+  <rect x="310" y="304" width="64" height="48" rx="14" fill="#0284c7"/>
+  <circle cx="342" cy="328" r="8" fill="#bae6fd"/>
+
+  <!-- Pager antenna -->
+  <rect x="138" y="86" width="32" height="38" rx="8" fill="#475569"/>
+</svg>
+

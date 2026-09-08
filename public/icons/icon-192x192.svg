@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded card -->
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+  <rect x="2" y="2" width="188" height="188" rx="40" fill="none" stroke="#334155" stroke-width="2" opacity="0.6"/>
+
+  <!-- Pager / Bleep device outline -->
+  <rect x="36" y="44" width="120" height="104" rx="18" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+  
+  <!-- Pager screen -->
+  <rect x="48" y="56" width="96" height="46" rx="8" fill="url(#screenGrad)" stroke="#10b981" stroke-width="1.5"/>
+  
+  <!-- Pulse / ECG wave line inside screen -->
+  <path d="M54 79 L72 79 L77 65 L83 91 L89 74 L94 82 L98 79 L138 79" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Hospital Cross / Sync indicator -->
+  <circle cx="126" cy="67" r="4" fill="#34d399"/>
+
+  <!-- Tactical buttons on the pager -->
+  <rect x="52" y="114" width="24" height="18" rx="5" fill="#334155"/>
+  <circle cx="64" cy="123" r="3" fill="#94a3b8"/>
+
+  <rect x="84" y="114" width="24" height="18" rx="5" fill="#059669"/>
+  <circle cx="96" cy="123" r="3" fill="#a7f3d0"/>
+
+  <rect x="116" y="114" width="24" height="18" rx="5" fill="#0284c7"/>
+  <circle cx="128" cy="123" r="3" fill="#bae6fd"/>
+
+  <!-- Pager antenna -->
+  <rect x="52" y="32" width="12" height="14" rx="3" fill="#475569"/>
+</svg>
+
