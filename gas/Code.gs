@@ -9,10 +9,10 @@ const SHEET_NAME = 'Guardias';
 const HEADERS = ['ID', 'Date', 'Colleague', 'Role', 'Notes', 'Created_At', 'Synced_At'];
 
 /**
- * Clave de seguridad (API Key / Token) para proteger tus guardias y notas.
- * Puedes configurarla aquí directamente (ej: 'MiClaveSegura2026') o en
- * Extensiones > Apps Script > Configuración del proyecto > Propiedades de la secuencia de comandos con la clave 'API_KEY'.
- * Si se define, ninguna petición sin esta clave podrá leer ni escribir datos.
+ * Security API key / token to protect duty shifts and clinical notes.
+ * Configure directly here (e.g. 'MySecureKey2026') or in:
+ * Extensions > Apps Script > Project Settings > Script Properties with key 'API_KEY'.
+ * When defined, any request without this key will be rejected (401 Unauthorized).
  */
 const SECRET_API_KEY = ''; 
 
@@ -21,14 +21,14 @@ function getExpectedApiKey() {
     const propKey = PropertiesService.getScriptProperties().getProperty('API_KEY');
     if (propKey && propKey.trim()) return propKey.trim();
   } catch (e) {
-    // Si no hay acceso a ScriptProperties, usar la constante
+    // Fall back to constant if ScriptProperties is inaccessible
   }
   return SECRET_API_KEY.trim();
 }
 
 function isAuthorized(providedKey) {
   const expected = getExpectedApiKey();
-  if (!expected) return true; // Si no se ha configurado ninguna clave, permite acceso
+  if (!expected) return true; // If no key is set, access is open
   return providedKey && String(providedKey).trim() === expected;
 }
 
@@ -78,7 +78,7 @@ function doGet(e) {
       return createJsonResponse({
         status: 'error',
         errorType: 'unauthorized',
-        message: 'Acceso no autorizado: Clave de seguridad (API Key) no válida o no proporcionada.'
+        message: 'Unauthorized access: Invalid or missing API Key.'
       });
     }
 
@@ -157,7 +157,7 @@ function doPost(e) {
       return createJsonResponse({
         status: 'error',
         errorType: 'unauthorized',
-        message: 'Acceso no autorizado: Clave de seguridad (API Key) no válida o no proporcionada.'
+        message: 'Unauthorized access: Invalid or missing API Key.'
       });
     }
 
@@ -275,4 +275,3 @@ function setupSheet() {
   const sheet = getOrCreateSheet();
   SpreadsheetApp.getActiveSpreadsheet().toast('Sheet initialized for BleepSync', 'BleepSync Setup');
 }
-

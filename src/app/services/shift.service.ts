@@ -129,7 +129,7 @@ export class ShiftService {
         const parsed: Shift[] = JSON.parse(storedShifts);
         this.shifts.set(parsed);
       } else {
-        // Primera instalación: iniciar con historial limpio para la doctora
+        // Initial installation: start with a clean duty history for the surgeon
         this.shifts.set([]);
       }
     } catch (err) {

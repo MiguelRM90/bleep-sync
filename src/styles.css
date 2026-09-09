@@ -116,11 +116,20 @@ body {
   transform: scale(0.97);
 }
 
+/* Custom element display fix for proper flex/grid layout and margins */
+app-header,
+app-duty-checker,
+app-duty-logger,
+app-metrics-summary,
+app-config-modal {
+  display: block;
+}
+
 /* Card container standard */
 .clinical-card {
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
 }
 

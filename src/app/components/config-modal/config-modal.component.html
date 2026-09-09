@@ -1,0 +1,304 @@
+<!-- Backdrop overlay -->
+<div
+  class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in"
+  (click)="closeOnBackdrop($event)"
+>
+  <div
+    class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80 backdrop-blur-md">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-sm shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-100">Ajustes & Nube</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Google Drive & Preferencias del dispositivo</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="close.emit()"
+        class="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition tactile-btn cursor-pointer"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body (Scrollable) -->
+    <div class="p-6 sm:p-7 overflow-y-auto space-y-6 text-sm">
+
+      <!-- Friendly Guide Banner -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-900 border border-emerald-500/30 flex items-center justify-between gap-3 shadow-md">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
+            📖
+          </span>
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold text-slate-100">¿Primera vez conectando Google Drive?</h4>
+            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Guía paso a paso explicada de forma sencilla.</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="showGuide.set(!showGuide())"
+          class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition tactile-btn shrink-0 shadow-sm cursor-pointer"
+        >
+          {{ showGuide() ? 'Ocultar Guía' : 'Ver Guía' }}
+        </button>
+      </div>
+
+      <!-- Step by Step Guide Card (Expandable) -->
+      @if (showGuide()) {
+        <div class="p-5 rounded-2xl bg-slate-950/90 border border-emerald-500/40 space-y-4 animate-fade-in text-xs text-slate-200">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span class="font-bold text-sm text-emerald-400 flex items-center gap-1.5">
+              ✨ Conectar con tu Google Drive en 5 pasos
+            </span>
+            <span class="text-[10px] text-slate-400">Totalmente privado</span>
+          </div>
+
+          <!-- Step 1 -->
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">1</span>
+            <div>
+              <p class="font-semibold text-slate-100">Crea una hoja de cálculo en tu Google Drive</p>
+              <p class="text-slate-400 mt-0.5">
+                Abre <a href="https://sheets.new" target="_blank" rel="noopener" class="text-emerald-400 underline hover:text-emerald-300 font-medium">sheets.new</a> y ponle de nombre <strong>"Guardias"</strong>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">2</span>
+            <div>
+              <p class="font-semibold text-slate-100">Abre el editor de Google</p>
+              <p class="text-slate-400 mt-0.5">
+                En el menú de arriba de tu hoja, pulsa en <strong>Extensiones</strong> y luego en <strong>Apps Script</strong>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">3</span>
+            <div>
+              <p class="font-semibold text-slate-100">Pega el código de conexión</p>
+              <p class="text-slate-400 mt-0.5">
+                Borra lo que aparezca y pega el contenido del archivo <code class="text-emerald-400 bg-slate-900 px-1 py-0.5 rounded">gas/Code.gs</code>. Luego pulsa el icono del disquete (Guardar).
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">4</span>
+            <div>
+              <p class="font-semibold text-slate-100">Implementar como Aplicación Web</p>
+              <p class="text-slate-400 mt-0.5">
+                Arriba a la derecha, pulsa el botón azul <strong>Implementar > Nueva implementación</strong>. Elige tipo <strong>Aplicación web</strong>, en <em>"Quién tiene acceso"</em> elige <strong>Cualquiera</strong> y dale a <strong>Implementar</strong> (y autoriza con tu cuenta de Google).
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">5</span>
+            <div>
+              <p class="font-semibold text-slate-100">Copia la dirección y pégala abajo</p>
+              <p class="text-slate-400 mt-0.5">
+                Copia la <strong>URL de la aplicación web</strong> que te muestra Google (termina en <code class="text-slate-300">/exec</code>) y pégala en la casilla siguiente. ¡Y listo!
+              </p>
+            </div>
+          </div>
+
+          <div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-[11px] text-emerald-200">
+            🔒 <strong>Privacidad total:</strong> Tu hoja permanece en tu Google Drive personal. Nadie puede ver tus guardias ni acceder a tu cuenta.
+          </div>
+        </div>
+      }
+
+      <!-- Google Apps Script & Security Card -->
+      <div class="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-5">
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path>
+          </svg>
+          <span>Conexión con tu Google Drive</span>
+        </div>
+
+        <!-- URL Input -->
+        <div class="space-y-2">
+          <label for="gasUrlInput" class="block font-semibold text-slate-200 text-xs uppercase tracking-wider">
+            URL del Web App (Google Apps Script)
+          </label>
+          <input
+            type="url"
+            id="gasUrlInput"
+            [(ngModel)]="gasUrl"
+            placeholder="https://script.google.com/macros/s/.../exec"
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition"
+          />
+          <p class="text-[11px] sm:text-xs text-slate-400">
+            Dirección generada al implementar el script en tu Google Drive.
+          </p>
+        </div>
+
+        <!-- API Key Input -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="gasApiKeyInput" class="block font-semibold text-slate-200 text-xs uppercase tracking-wider">
+              Clave de Seguridad (API Key / Contraseña)
+            </label>
+            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/70 border border-emerald-700/50 px-2 py-0.5 rounded-md">
+              Protección Opcional
+            </span>
+          </div>
+          <input
+            type="password"
+            id="gasApiKeyInput"
+            [(ngModel)]="gasApiKey"
+            placeholder="Contraseña secreta configurada en Code.gs"
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition"
+          />
+          <p class="text-[11px] sm:text-xs text-slate-400">
+            Si definiste <code class="text-emerald-400 bg-slate-900 px-1 py-0.5 rounded">SECRET_API_KEY</code> en tu script, escríbela aquí para bloquear cualquier intento no autorizado.
+          </p>
+        </div>
+      </div>
+
+      <!-- Cloud Sync Actions Card -->
+      <div class="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3.5">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block">
+          Acciones de Sincronización
+        </span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            (click)="syncPending()"
+            [disabled]="shiftService.isSyncing() || !gasUrl.trim()"
+            class="px-4 py-3.5 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold hover:bg-emerald-600/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed tactile-btn cursor-pointer"
+          >
+            @if (shiftService.isSyncing()) {
+              <span class="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+            } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+              </svg>
+            }
+            Subir pendientes ({{ shiftService.pendingSyncCount() }})
+          </button>
+
+          <button
+            type="button"
+            (click)="fetchRemote()"
+            [disabled]="shiftService.isSyncing() || !gasUrl.trim()"
+            class="px-4 py-3.5 rounded-xl bg-sky-600/20 text-sky-300 border border-sky-500/40 text-xs font-bold hover:bg-sky-600/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed tactile-btn cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Descargar de Google Sheet
+          </button>
+        </div>
+      </div>
+
+      <!-- User Profile & Options Card -->
+      <div class="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-4">
+        <!-- Surgeon Profile Name -->
+        <div class="space-y-2">
+          <label for="surgeonNameInput" class="block font-semibold text-slate-200 text-xs uppercase tracking-wider">
+            Nombre de la Doctora / Cirujana
+          </label>
+          <input
+            type="text"
+            id="surgeonNameInput"
+            [(ngModel)]="surgeonName"
+            placeholder="Ej: Dra. García"
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition font-medium"
+          />
+        </div>
+
+        <!-- Preferences Toggles -->
+        <div class="space-y-3 pt-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block">
+            Opciones del Dispositivo
+          </span>
+
+          <!-- Haptic toggle -->
+          <label class="flex items-center justify-between p-4 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+            <div>
+              <span class="text-xs sm:text-sm font-semibold text-slate-200 block">Respuesta Háptica (Vibración)</span>
+              <span class="text-[11px] sm:text-xs text-slate-400">Vibración táctil al registrar y seleccionar guardia</span>
+            </div>
+            <input
+              type="checkbox"
+              [(ngModel)]="hapticEnabled"
+              class="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-700 cursor-pointer"
+            />
+          </label>
+
+          <!-- Auto-sync toggle -->
+          <label class="flex items-center justify-between p-4 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+            <div>
+              <span class="text-xs sm:text-sm font-semibold text-slate-200 block">Autosincronización al volver online</span>
+              <span class="text-[11px] sm:text-xs text-slate-400">Sube automáticamente las guardias guardadas en quirófano</span>
+            </div>
+            <input
+              type="checkbox"
+              [(ngModel)]="autoSync"
+              class="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-700 cursor-pointer"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- Demo & Reset Section -->
+      <div class="pt-2 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          (click)="restoreDemoData()"
+          class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold py-2 px-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 transition tactile-btn cursor-pointer"
+        >
+          Restaurar datos de prueba
+        </button>
+
+        <button
+          type="button"
+          (click)="clearAllData()"
+          class="text-xs text-rose-400 hover:text-rose-300 font-semibold py-2 px-3 rounded-xl border border-rose-500/25 bg-rose-500/10 transition tactile-btn cursor-pointer"
+        >
+          Borrar base local
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 border-t border-slate-800 bg-slate-950/95 flex items-center justify-end gap-3">
+      <button
+        type="button"
+        (click)="close.emit()"
+        class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition tactile-btn cursor-pointer"
+      >
+        Cerrar
+      </button>
+      <button
+        type="button"
+        (click)="saveConfiguration()"
+        class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-950/50 transition tactile-btn cursor-pointer"
+      >
+        Guardar Ajustes
+      </button>
+    </div>
+  </div>
+</div>
+

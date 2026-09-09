@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, output, effect, input } from '@angular/core';
+import { Component, inject, signal, computed, output, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShiftService } from '../../services/shift.service';
@@ -8,196 +8,7 @@ import { DutyRole } from '../../models/shift.model';
   selector: 'app-duty-checker',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <section class="clinical-card p-5 transition-all">
-      <!-- Section Header -->
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2.5">
-          <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-sm">
-            1
-          </span>
-          <div>
-            <h2 class="text-base font-semibold text-slate-100 tracking-tight">¿Con quién estás de guardia hoy?</h2>
-            <p class="text-xs text-slate-400">Selecciona el adjunto para consultar la rotación recomendada</p>
-          </div>
-        </div>
-
-        <!-- Add colleague toggle -->
-        <button
-          (click)="toggleAddColleague()"
-          class="text-xs font-medium text-emerald-400 hover:text-emerald-300 flex items-center gap-1 py-1 px-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition tactile-btn"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            @if (showAddColleagueInput()) {
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            } @else {
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            }
-          </svg>
-          <span>{{ showAddColleagueInput() ? 'Cancelar' : 'Nuevo' }}</span>
-        </button>
-      </div>
-
-      <!-- Quick Add New Colleague Form -->
-      @if (showAddColleagueInput()) {
-        <div class="mb-4 p-3 bg-slate-900/90 rounded-xl border border-emerald-500/30 animate-fade-in flex gap-2">
-          <input
-            type="text"
-            [(ngModel)]="newColleagueName"
-            placeholder="Ej: Dr. Pérez / Dra. Martín"
-            (keydown.enter)="addNewColleague()"
-            class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-          />
-          <button
-            (click)="addNewColleague()"
-            [disabled]="!newColleagueName.trim()"
-            class="px-3.5 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50 disabled:pointer-events-none transition tactile-btn"
-          >
-            Añadir
-          </button>
-        </div>
-      }
-
-      <!-- Colleague Selector Dropdown / Pills -->
-      <div class="mb-5">
-        <label for="colleagueSelect" class="block text-xs font-medium text-slate-300 mb-1.5">
-          Adjunto de Cirugía
-        </label>
-        <div class="relative">
-          <select
-            id="colleagueSelect"
-            [ngModel]="selectedColleague()"
-            (ngModelChange)="onColleagueSelect($event)"
-            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition cursor-pointer font-medium"
-          >
-            <option value="" disabled>-- Selecciona un adjunto --</option>
-            @for (colleague of shiftService.colleagues(); track colleague) {
-              <option [value]="colleague">{{ colleague }}</option>
-            }
-          </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Quick selection chips for frequent colleagues -->
-        @if (shiftService.colleagues().length > 0) {
-          <div class="flex flex-wrap gap-1.5 mt-2.5">
-            <span class="text-[11px] text-slate-400 self-center mr-1">Frecuentes:</span>
-            @for (colleague of shiftService.colleagues().slice(0, 4); track colleague) {
-              <button
-                type="button"
-                (click)="onColleagueSelect(colleague)"
-                class="px-2.5 py-1 text-xs rounded-lg transition tactile-btn border"
-                [ngClass]="{
-                  'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-semibold': selectedColleague() === colleague,
-                  'bg-slate-800/80 text-slate-300 border-slate-700 hover:border-slate-600': selectedColleague() !== colleague
-                }"
-              >
-                {{ colleague }}
-              </button>
-            }
-          </div>
-        }
-      </div>
-
-      <!-- Dynamic Recommendation Card -->
-      @if (selectedColleague()) {
-        <div
-          class="rounded-xl border p-4 transition-all duration-300 animate-fade-in"
-          [ngClass]="{
-            'bg-emerald-950/20 border-emerald-500/30 shadow-lg shadow-emerald-950/20': recommendation().recommendedRole === 'Urgencias',
-            'bg-sky-950/20 border-sky-500/30 shadow-lg shadow-sky-950/20': recommendation().recommendedRole === 'Planta',
-            'bg-slate-900 border-slate-700': recommendation().requiresManualSelection
-          }"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
-                Recomendación de Rotación
-              </span>
-              
-              @if (recommendation().recommendedRole) {
-                <div class="flex items-center gap-2 mb-1.5">
-                  <span class="text-xs text-slate-300">Te corresponde hoy:</span>
-                  <span
-                    class="text-sm font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wide border shadow-sm"
-                    [ngClass]="{
-                      'bg-emerald-500/20 text-emerald-300 border-emerald-500/40': recommendation().recommendedRole === 'Urgencias',
-                      'bg-sky-500/20 text-sky-300 border-sky-500/40': recommendation().recommendedRole === 'Planta'
-                    }"
-                  >
-                    {{ recommendation().recommendedRole }}
-                  </span>
-                </div>
-              } @else {
-                <div class="flex items-center gap-2 mb-1.5">
-                  <span class="text-sm font-bold text-amber-300">Elección manual requerida</span>
-                </div>
-              }
-
-              <p class="text-xs text-slate-300 leading-relaxed">
-                {{ recommendation().reason }}
-              </p>
-            </div>
-
-            <!-- Visual Icon -->
-            <div
-              class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
-              [ngClass]="{
-                'bg-emerald-500/20 text-emerald-400 border-emerald-500/30': recommendation().recommendedRole === 'Urgencias',
-                'bg-sky-500/20 text-sky-400 border-sky-500/30': recommendation().recommendedRole === 'Planta',
-                'bg-slate-800 text-amber-400 border-slate-700': recommendation().requiresManualSelection
-              }"
-            >
-              @if (recommendation().recommendedRole === 'Urgencias') {
-                <!-- Emergency Stethoscope / Siren -->
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-              } @else if (recommendation().recommendedRole === 'Planta') {
-                <!-- Ward / Hospital Bed -->
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-              } @else {
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              }
-            </div>
-          </div>
-
-          <!-- Quick Action to apply recommendation -->
-          @if (recommendation().recommendedRole) {
-            <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
-              <span class="text-[11px] text-slate-400">¿Asignar esta rotación en el registro?</span>
-              <button
-                type="button"
-                (click)="applyRecommendation()"
-                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-sm shadow-emerald-900/30 transition tactile-btn flex items-center gap-1.5"
-              >
-                <span>Aplicar a {{ recommendation().recommendedRole }}</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                </svg>
-              </button>
-            </div>
-          }
-        </div>
-      } @else {
-        <!-- Empty prompt placeholder -->
-        <div class="border border-dashed border-slate-800 rounded-xl p-6 text-center text-slate-500">
-          <svg class="w-8 h-8 mx-auto mb-2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-          </svg>
-          <p class="text-xs font-medium">Elige a tu compañero de guardia para ver la recomendación automática de busca.</p>
-        </div>
-      }
-    </section>
-  `,
+  templateUrl: './duty-checker.component.html',
 })
 export class DutyCheckerComponent {
   readonly shiftService = inject(ShiftService);
@@ -214,7 +25,7 @@ export class DutyCheckerComponent {
   });
 
   constructor() {
-    // Default to the first colleague if available
+    // Default to the first colleague in the roster if available
     effect(() => {
       const list = this.shiftService.colleagues();
       if (list.length > 0 && !this.selectedColleague()) {
@@ -257,4 +68,3 @@ export class DutyCheckerComponent {
     }
   }
 }
-

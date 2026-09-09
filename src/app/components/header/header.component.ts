@@ -6,92 +6,9 @@ import { ShiftService } from '../../services/shift.service';
   selector: 'app-header',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <header class="w-full bg-slate-900 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md bg-opacity-95 shadow-lg px-4 py-3">
-      <div class="max-w-xl mx-auto flex items-center justify-between">
-        <!-- Logo & Branding -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-md shadow-emerald-500/20 border border-emerald-400/30">
-            <!-- Pager SVG Icon -->
-            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="6" width="20" height="14" rx="3"></rect>
-              <line x1="6" y1="10" x2="14" y2="10"></line>
-              <line x1="6" y1="13" x2="10" y2="13"></line>
-              <circle cx="17.5" cy="11.5" r="1.5" fill="currentColor"></circle>
-              <path d="M6 3v3"></path>
-            </svg>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="font-bold text-lg text-slate-100 tracking-tight leading-none">BleepSync</h1>
-              <span class="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                Guardias
-              </span>
-            </div>
-            <p class="text-xs text-slate-400 font-medium leading-tight mt-0.5">
-              {{ shiftService.config().currentSurgeonName }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Status indicators & Actions -->
-        <div class="flex items-center gap-2">
-          <!-- Pending sync badge / button -->
-          @if (shiftService.pendingSyncCount() > 0) {
-            <button
-              (click)="shiftService.syncPendingShifts()"
-              [disabled]="shiftService.isSyncing()"
-              class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition tactile-btn"
-              title="Guardias pendientes de sincronizar con Google Sheets. Haz clic para sincronizar."
-            >
-              @if (shiftService.isSyncing()) {
-                <span class="inline-block w-2.5 h-2.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></span>
-              } @else {
-                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-              }
-              <span>{{ shiftService.pendingSyncCount() }} pend.</span>
-            </button>
-          }
-
-          <!-- Network Online/Offline Pill -->
-          <div
-            class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
-            [ngClass]="{
-              'bg-emerald-950/40 text-emerald-300 border-emerald-700/40': shiftService.isOnline(),
-              'bg-rose-950/40 text-rose-300 border-rose-700/40': !shiftService.isOnline()
-            }"
-            [title]="shiftService.isOnline() ? 'Conectado a la red' : 'Modo Offline - Guardando en memoria local segura'"
-          >
-            <span
-              class="w-2 h-2 rounded-full"
-              [ngClass]="{
-                'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]': shiftService.isOnline(),
-                'bg-rose-500 animate-pulse': !shiftService.isOnline()
-              }"
-            ></span>
-            <span class="hidden sm:inline">{{ shiftService.isOnline() ? 'Online' : 'Offline' }}</span>
-          </div>
-
-          <!-- Settings Cog button -->
-          <button
-            (click)="openConfig.emit()"
-            class="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition tactile-btn border border-transparent hover:border-slate-700"
-            title="Ajustes y conexión Google Sheets"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </header>
-  `,
+  templateUrl: './header.component.html',
 })
 export class HeaderComponent {
   readonly shiftService = inject(ShiftService);
   readonly openConfig = output<void>();
 }
-

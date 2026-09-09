@@ -30,6 +30,7 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 5. **Private Serverless Backend (Google Sheets & Apps Script)**:
    - Zero recurring server costs, private data ownership, and instant spreadsheet analysis.
    - Built-in CORS and HTTP redirect resilience (`redirect: 'follow'` with `text/plain` JSON payload).
+   - Optional API Key authorization token preventing unauthorized access to duty logs and clinical notes.
 
 ---
 
@@ -39,7 +40,7 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 ┌─────────────────────────────────────────────────────────────┐
 │                       Client Device                         │
 │  ┌──────────────────────┐        ┌────────────────────────┐ │
-│  │ Angular 19 PWA       │        │ Angular Service Worker │ │
+│  │ Angular 22 PWA       │        │ Angular Service Worker │ │
 │  │ (Signals + CSS vars) │◄───────┤ (ngsw-worker.js cache) │ │
 │  └──────────┬───────────┘        └────────────────────────┘ │
 │             │                                               │
@@ -56,6 +57,7 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 │  │ Google Apps Script (Web App: gas/Code.gs)             │  │
 │  │ - doGet(e)   -> Reads rows from Sheet                 │  │
 │  │ - doPost(e)  -> Upserts single or batch shifts        │  │
+│  │ - Authorization: Token validation via SECRET_API_KEY  │  │
 │  └──────────────────────────┬────────────────────────────┘  │
 │                             │                               │
 │                             ▼                               │
@@ -71,8 +73,8 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 20+ or 22+
-- npm 10+
+- Node.js 22+ or 24+
+- npm 10+ or 11+
 
 ### Local Development Setup
 
@@ -94,6 +96,8 @@ Navigate to `http://localhost:4200` in your browser.
 
 ## 📊 Google Sheets & Apps Script Backend Deployment
 
+> 💡 **Looking for a non-technical step-by-step setup tutorial?** Check out the **[Google Drive Setup Guide (in Spanish)](GUIA_GOOGLE_DRIVE.md)** designed with clear explanations for non-technical users.
+
 Follow these steps to link BleepSync to your private Google Sheet:
 
 ### Step 1: Create the Google Sheet
@@ -104,7 +108,7 @@ Follow these steps to link BleepSync to your private Google Sheet:
 1. In your Google Sheet, click **Extensions** > **Apps Script** (*Extensiones* > *Apps Script*).
 2. Delete any boilerplate code in `Code.gs`.
 3. Open [`gas/Code.gs`](gas/Code.gs) from this repository, copy its entire content, and paste it into the Apps Script editor.
-4. **Seguridad (Recomendado)**: Define una clave secreta en la variable `const SECRET_API_KEY = 'TuClaveSecreta';` en la parte superior del archivo (o agrégala en *Configuración del proyecto* > *Propiedades de la secuencia de comandos* con la propiedad `API_KEY`). Esto garantizará que nadie pueda acceder ni modificar tus guardias sin dicha clave.
+4. **Security (Recommended)**: Set a secret passphrase in the variable `const SECRET_API_KEY = 'YourSecretKey';` at the top of the file (or configure it in *Project Settings* > *Script Properties* with the property `API_KEY`). This ensures that no unauthorized requests can read or alter your duty records.
 5. Click **Save** (💾 icon).
 6. (Optional) Select `setupSheet` from the function dropdown and click **Run** to format the headers.
 
@@ -115,18 +119,18 @@ Follow these steps to link BleepSync to your private Google Sheet:
    - **Description**: `BleepSync API v1`
    - **Execute as**: `Me (your_email@gmail.com)`
    - **Who has access**: `Anyone` (*Cualquiera*)
-     > **Note**: Choosing *Anyone* allows your PWA client to communicate with the endpoint without complex OAuth login flows. Tu Google Sheet permanece 100% privado en tu Google Drive; además, con la clave secreta `SECRET_API_KEY`, cualquier intento de acceso sin autorización es rechazado.
+     > **Note**: Selecting *Anyone* allows your mobile PWA client to communicate with the endpoint without complex OAuth login prompts. Your Google Sheet remains 100% private in your personal Google Drive; moreover, with `SECRET_API_KEY` configured, any unauthorized request is strictly blocked.
 4. Click **Deploy**.
 5. Grant permissions when prompted by Google (click *Advanced* > *Go to BleepSync (unsafe)* > *Allow*).
 6. Copy the generated **Web app URL** (format: `https://script.google.com/macros/s/AKfycb.../exec`).
 
 ### Step 4: Configure BleepSync
-1. Open the BleepSync PWA in your browser.
+1. Open the BleepSync PWA in your browser or phone.
 2. Tap the **Settings icon (⚙️)** in the top navigation bar.
 3. Paste your Web App URL into the **URL del Web App (Google Apps Script)** field.
-4. If you configured a `SECRET_API_KEY`, enter it in the **Clave de Seguridad (API Key / Token)** field.
-5. Tap **Guardar Ajustes**.
-6. Tap **Descargar de Google Sheet** to verify connectivity!
+4. If you configured a `SECRET_API_KEY`, enter it in the **Clave de Seguridad (API Key / Contraseña)** field.
+5. Tap **Guardar Ajustes** (*Save Settings*).
+6. Tap **Descargar de Google Sheet** (*Fetch Remote*) to verify connectivity!
 
 ---
 
@@ -175,3 +179,4 @@ npm run build:gh-pages
 
 ## 📄 License
 MIT License. Created for surgical healthcare teams.
+
