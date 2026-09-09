@@ -25,7 +25,7 @@
       <button
         type="button"
         (click)="close.emit()"
-        class="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition tactile-btn cursor-pointer"
+        class="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -50,7 +50,7 @@
         <button
           type="button"
           (click)="showGuide.set(!showGuide())"
-          class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition tactile-btn shrink-0 shadow-sm cursor-pointer"
+          class="btn-primary shrink-0"
         >
           {{ showGuide() ? 'Ocultar Guía' : 'Ver Guía' }}
         </button>
@@ -100,7 +100,7 @@
                 <button
                   type="button"
                   (click)="copyGasCode()"
-                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all tactile-btn border shadow-sm cursor-pointer"
+                  class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold transition active:scale-[0.97] border shadow-sm cursor-pointer inline-flex items-center justify-center gap-2"
                   [ngClass]="{
                     'bg-emerald-500 text-slate-950 border-emerald-400 shadow-emerald-950/40 font-extrabold': isGasCodeCopied(),
                     'bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border-emerald-500/50 hover:border-emerald-400': !isGasCodeCopied()
@@ -155,7 +155,7 @@
       }
 
       <!-- Google Apps Script & Security Card -->
-      <div class="p-5 sm:p-6 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col gap-5 shadow-sm">
+      <div class="card-subtle flex flex-col gap-5">
         <div class="flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-emerald-400 pb-1 border-b border-slate-800/70">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path>
@@ -173,7 +173,7 @@
             id="gasUrlInput"
             [(ngModel)]="gasUrl"
             placeholder="https://script.google.com/macros/s/.../exec"
-            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition shadow-inner min-h-[46px]"
+            class="input-clinical font-mono"
           />
           <p class="text-xs text-slate-400 leading-normal">
             Dirección generada al implementar el script en tu Google Drive.
@@ -195,7 +195,7 @@
             id="gasApiKeyInput"
             [(ngModel)]="gasApiKey"
             placeholder="Contraseña secreta configurada en Code.gs"
-            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition shadow-inner min-h-[46px]"
+            class="input-clinical font-mono"
           />
           <p class="text-xs text-slate-400 leading-normal">
             Si definiste <code class="text-emerald-400 bg-slate-900 px-1 py-0.5 rounded">SECRET_API_KEY</code> en tu script, escríbela aquí para bloquear cualquier intento no autorizado.
@@ -204,7 +204,7 @@
       </div>
 
       <!-- Cloud Sync Actions Card -->
-      <div class="p-5 sm:p-6 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col gap-4 shadow-sm">
+      <div class="card-subtle flex flex-col gap-4">
         <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
           Acciones de Sincronización
         </span>
@@ -213,7 +213,7 @@
             type="button"
             (click)="syncPending()"
             [disabled]="shiftService.isSyncing() || !gasUrl.trim()"
-            class="px-4 py-4 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold hover:bg-emerald-600/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed tactile-btn cursor-pointer min-h-[48px]"
+            class="btn-emerald-soft"
           >
             @if (shiftService.isSyncing()) {
               <span class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
@@ -229,7 +229,7 @@
             type="button"
             (click)="fetchRemote()"
             [disabled]="shiftService.isSyncing() || !gasUrl.trim()"
-            class="px-4 py-4 rounded-xl bg-sky-600/20 text-sky-300 border border-sky-500/40 text-xs font-bold hover:bg-sky-600/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed tactile-btn cursor-pointer min-h-[48px]"
+            class="btn-sky-soft"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -240,7 +240,7 @@
       </div>
 
       <!-- User Profile & Options Card -->
-      <div class="p-5 sm:p-6 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col gap-5 shadow-sm">
+      <div class="card-subtle flex flex-col gap-5">
         <!-- Surgeon Profile Name -->
         <div class="flex flex-col gap-2">
           <label for="surgeonNameInput" class="font-semibold text-slate-200 text-xs uppercase tracking-wider">
@@ -251,7 +251,7 @@
             id="surgeonNameInput"
             [(ngModel)]="surgeonName"
             placeholder="Ej: Dra. García"
-            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition font-medium shadow-inner min-h-[46px]"
+            class="input-clinical font-medium"
           />
         </div>
 
@@ -294,7 +294,7 @@
         <button
           type="button"
           (click)="restoreDemoData()"
-          class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold py-2.5 px-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 transition tactile-btn cursor-pointer"
+          class="btn-emerald-chip"
         >
           Restaurar datos de prueba
         </button>
@@ -302,7 +302,7 @@
         <button
           type="button"
           (click)="clearAllData()"
-          class="text-xs text-rose-400 hover:text-rose-300 font-semibold py-2.5 px-4 rounded-xl border border-rose-500/25 bg-rose-500/10 transition tactile-btn cursor-pointer"
+          class="btn-rose-chip"
         >
           Borrar base local
         </button>
@@ -314,14 +314,14 @@
       <button
         type="button"
         (click)="close.emit()"
-        class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition tactile-btn cursor-pointer min-h-[42px]"
+        class="btn-secondary"
       >
         Cerrar
       </button>
       <button
         type="button"
         (click)="saveConfiguration()"
-        class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-950/50 transition tactile-btn cursor-pointer min-h-[42px]"
+        class="btn-primary"
       >
         Guardar Ajustes
       </button>

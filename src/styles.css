@@ -127,3 +127,40 @@ app-config-modal {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
 }
+
+/* Reusable clinical UI component classes */
+.card-subtle {
+  @apply p-5 sm:p-6 rounded-2xl bg-slate-950/70 border border-slate-800 shadow-sm;
+}
+
+.input-clinical {
+  @apply w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition shadow-inner min-h-[46px];
+}
+
+.btn-primary {
+  @apply px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-950/50 transition active:scale-[0.97] cursor-pointer min-h-[42px] inline-flex items-center justify-center gap-2 select-none;
+}
+
+.btn-secondary {
+  @apply px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition active:scale-[0.97] cursor-pointer min-h-[42px] inline-flex items-center justify-center gap-2 select-none;
+}
+
+.btn-emerald-soft {
+  @apply px-4 py-3.5 sm:py-4 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold hover:bg-emerald-600/30 transition active:scale-[0.97] cursor-pointer min-h-[48px] inline-flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed select-none;
+}
+
+.btn-sky-soft {
+  @apply px-4 py-3.5 sm:py-4 rounded-xl bg-sky-600/20 text-sky-300 border border-sky-500/40 text-xs font-bold hover:bg-sky-600/30 transition active:scale-[0.97] cursor-pointer min-h-[48px] inline-flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed select-none;
+}
+
+.btn-emerald-chip {
+  @apply text-xs text-emerald-400 hover:text-emerald-300 font-semibold py-2.5 px-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 transition active:scale-[0.97] cursor-pointer inline-flex items-center justify-center gap-1.5 select-none;
+}
+
+.btn-rose-chip {
+  @apply text-xs text-rose-400 hover:text-rose-300 font-semibold py-2.5 px-4 rounded-xl border border-rose-500/25 bg-rose-500/10 transition active:scale-[0.97] cursor-pointer inline-flex items-center justify-center gap-1.5 select-none;
+}
+
+.btn-submit-duty {
+  @apply w-full h-14 py-4 px-6 rounded-2xl font-bold text-white text-base tracking-wide transition shadow-xl flex items-center justify-center gap-3 active:scale-[0.98] cursor-pointer select-none;
+}
