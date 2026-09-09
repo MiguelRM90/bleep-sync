@@ -32,13 +32,14 @@
 
 ## 📝 Paso 3: Pegar el código que conecta con la app
 
-1. En esa pantalla verás algo como `function myFunction() { ... }`.
-2. **Borra todo** lo que haya escrito en ese cuadro para dejarlo en blanco.
-3. Copia todo el contenido del archivo [`gas/Code.gs`](gas/Code.gs) de este repositorio y **pégalo** en ese cuadro en blanco.
-4. *(Opcional pero recomendado para máxima seguridad)*: En la línea 15 verás:  
+3. **Copia el código**:
+   - 💡 **¡Truco fácil!**: En la propia app BleepSync (en la rueda ⚙️ de Ajustes), tienes un botón que dice **«📋 Copiar código de gas/Code.gs»**. Púlsalo y te copiará todo el código automáticamente sin tener que buscar ningún archivo.
+   - *(O también puedes copiarlo directamente del archivo [`gas/Code.gs`](gas/Code.gs) de este repositorio).*
+4. **Pégalo** en el cuadro de texto de Google Apps Script.
+5. *(Opcional pero recomendado para máxima seguridad)*: En la línea 15 verás:  
    `const SECRET_API_KEY = '';`  
    Si quieres ponerle una contraseña secreta, escribe una palabra tuya entre las comillas (ejemplo: `const SECRET_API_KEY = 'Guardias2026';`).
-5. Haz clic en el icono del **Disquete (Guardar)** 💾 que hay arriba en la barra de herramientas.
+6. Haz clic en el icono del **Disquete (Guardar)** 💾 que hay arriba en la barra de herramientas.
 
 ---
 

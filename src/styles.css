@@ -42,12 +42,6 @@
   --shadow-glow-cyan: 0 0 25px -4px rgba(2, 132, 199, 0.35);
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 html, body {
   height: 100%;
   font-family: var(--font-sans);
@@ -57,6 +51,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 body {
@@ -132,4 +127,3 @@ app-config-modal {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
 }
-

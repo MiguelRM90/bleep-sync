@@ -2,6 +2,7 @@ import { Component, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShiftService } from '../../services/shift.service';
+import { GAS_CODE_GS } from '../../constants/gas-code.constant';
 
 @Component({
   selector: 'app-config-modal',
@@ -14,6 +15,7 @@ export class ConfigModalComponent {
   readonly close = output<void>();
 
   showGuide = signal<boolean>(false);
+  isGasCodeCopied = signal<boolean>(false);
 
   gasUrl = this.shiftService.config().gasEndpointUrl;
   gasApiKey = this.shiftService.config().gasApiKey || '';
@@ -23,6 +25,23 @@ export class ConfigModalComponent {
 
   closeOnBackdrop(event: MouseEvent): void {
     this.close.emit();
+  }
+
+  async copyGasCode(): Promise<void> {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(GAS_CODE_GS);
+        this.isGasCodeCopied.set(true);
+        this.shiftService.showToast('¡Código de gas/Code.gs copiado al portapapeles! Listo para pegar en Google.', 'success');
+        this.shiftService.triggerHaptic();
+        setTimeout(() => {
+          this.isGasCodeCopied.set(false);
+        }, 3000);
+      }
+    } catch (err) {
+      console.error('Failed to copy GAS code to clipboard:', err);
+      this.shiftService.showToast('Error al copiar al portapapeles.', 'error');
+    }
   }
 
   saveConfiguration(): void {
