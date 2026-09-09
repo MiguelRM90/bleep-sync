@@ -39,6 +39,7 @@ export interface Recommendation {
 
 export interface AppConfig {
   gasEndpointUrl: string;
+  gasApiKey?: string;
   currentSurgeonName: string;
   autoSyncOnReconnect: boolean;
   hapticFeedbackEnabled: boolean;

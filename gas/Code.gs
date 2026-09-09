@@ -9,6 +9,30 @@ const SHEET_NAME = 'Guardias';
 const HEADERS = ['ID', 'Date', 'Colleague', 'Role', 'Notes', 'Created_At', 'Synced_At'];
 
 /**
+ * Clave de seguridad (API Key / Token) para proteger tus guardias y notas.
+ * Puedes configurarla aquí directamente (ej: 'MiClaveSegura2026') o en
+ * Extensiones > Apps Script > Configuración del proyecto > Propiedades de la secuencia de comandos con la clave 'API_KEY'.
+ * Si se define, ninguna petición sin esta clave podrá leer ni escribir datos.
+ */
+const SECRET_API_KEY = ''; 
+
+function getExpectedApiKey() {
+  try {
+    const propKey = PropertiesService.getScriptProperties().getProperty('API_KEY');
+    if (propKey && propKey.trim()) return propKey.trim();
+  } catch (e) {
+    // Si no hay acceso a ScriptProperties, usar la constante
+  }
+  return SECRET_API_KEY.trim();
+}
+
+function isAuthorized(providedKey) {
+  const expected = getExpectedApiKey();
+  if (!expected) return true; // Si no se ha configurado ninguna clave, permite acceso
+  return providedKey && String(providedKey).trim() === expected;
+}
+
+/**
  * Helper to get or create the Guardias sheet with formatted headers
  */
 function getOrCreateSheet() {
@@ -49,6 +73,15 @@ function getOrCreateSheet() {
  */
 function doGet(e) {
   try {
+    const providedKey = (e && e.parameter && (e.parameter.apiKey || e.parameter.key)) || '';
+    if (!isAuthorized(providedKey)) {
+      return createJsonResponse({
+        status: 'error',
+        errorType: 'unauthorized',
+        message: 'Acceso no autorizado: Clave de seguridad (API Key) no válida o no proporcionada.'
+      });
+    }
+
     const sheet = getOrCreateSheet();
     const lastRow = sheet.getLastRow();
 
@@ -118,6 +151,16 @@ function doPost(e) {
 
     const payloadRaw = e.postData.contents;
     const body = JSON.parse(payloadRaw);
+
+    const providedKey = body.apiKey || (e && e.parameter && (e.parameter.apiKey || e.parameter.key)) || '';
+    if (!isAuthorized(providedKey)) {
+      return createJsonResponse({
+        status: 'error',
+        errorType: 'unauthorized',
+        message: 'Acceso no autorizado: Clave de seguridad (API Key) no válida o no proporcionada.'
+      });
+    }
+
     const action = body.action || 'create_shift';
     const sheet = getOrCreateSheet();
 

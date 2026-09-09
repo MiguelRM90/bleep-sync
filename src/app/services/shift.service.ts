@@ -19,6 +19,7 @@ export class ShiftService {
   // App Configuration Signal
   readonly config = signal<AppConfig>({
     gasEndpointUrl: '',
+    gasApiKey: '',
     currentSurgeonName: 'Cirujano de Guardia',
     autoSyncOnReconnect: true,
     hapticFeedbackEnabled: true,
@@ -128,8 +129,8 @@ export class ShiftService {
         const parsed: Shift[] = JSON.parse(storedShifts);
         this.shifts.set(parsed);
       } else {
-        // First run: load initial realistic demo data for the surgeon
-        this.seedInitialDemoData();
+        // Primera instalación: iniciar con historial limpio para la doctora
+        this.shifts.set([]);
       }
     } catch (err) {
       console.error('Failed to load initial data from localStorage:', err);
@@ -249,6 +250,7 @@ export class ShiftService {
 
     try {
       this.isSyncing.set(true);
+      const apiKey = this.config().gasApiKey?.trim() || undefined;
       // Google Apps Script requires text/plain and redirect: 'follow' to avoid CORS preflight
       const response = await fetch(url, {
         method: 'POST',
@@ -256,6 +258,7 @@ export class ShiftService {
           'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify({
+          apiKey,
           action: 'create_shift',
           payload: shift,
         }),
@@ -270,6 +273,8 @@ export class ShiftService {
       if (result && (result.status === 'success' || result.status === 'ok')) {
         this.updateShiftSyncStatus(shift.id, 'synced');
         this.lastSyncTimestamp.set(new Date());
+      } else if (result?.errorType === 'unauthorized' || result?.status === 'unauthorized') {
+        throw new Error('Clave de seguridad no válida en Google Apps Script.');
       } else {
         throw new Error(result?.message || 'Error en respuesta de Google Apps Script');
       }
@@ -307,12 +312,14 @@ export class ShiftService {
       this.isSyncing.set(true);
       this.syncError.set(null);
 
+      const apiKey = this.config().gasApiKey?.trim() || undefined;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify({
+          apiKey,
           action: 'batch_sync',
           payload: pending,
         }),
@@ -336,6 +343,8 @@ export class ShiftService {
         );
         this.lastSyncTimestamp.set(new Date());
         this.showToast(`¡Sincronizadas ${pending.length} guardias con Google Sheets!`, 'success');
+      } else if (result?.errorType === 'unauthorized' || result?.status === 'unauthorized') {
+        throw new Error('Clave de seguridad inválida en Google Apps Script.');
       } else {
         throw new Error(result?.message || 'Respuesta inválida de Google Apps Script');
       }
@@ -362,7 +371,12 @@ export class ShiftService {
       this.isSyncing.set(true);
       this.syncError.set(null);
 
-      const fetchUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const apiKey = this.config().gasApiKey?.trim();
+      const queryParams = ['t=' + Date.now()];
+      if (apiKey) {
+        queryParams.push('apiKey=' + encodeURIComponent(apiKey));
+      }
+      const fetchUrl = url + (url.includes('?') ? '&' : '?') + queryParams.join('&');
       const response = await fetch(fetchUrl, {
         method: 'GET',
         redirect: 'follow',
@@ -402,6 +416,8 @@ export class ShiftService {
         this.shifts.set(Array.from(localMap.values()));
         this.lastSyncTimestamp.set(new Date());
         this.showToast(`Sincronización completa: ${remoteShifts.length} guardias cargadas`, 'success');
+      } else if (result?.errorType === 'unauthorized' || result?.status === 'unauthorized') {
+        throw new Error('Clave de seguridad inválida en Google Apps Script.');
       } else {
         throw new Error(result?.message || 'Formato de datos no reconocido');
       }

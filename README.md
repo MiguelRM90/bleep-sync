@@ -104,8 +104,9 @@ Follow these steps to link BleepSync to your private Google Sheet:
 1. In your Google Sheet, click **Extensions** > **Apps Script** (*Extensiones* > *Apps Script*).
 2. Delete any boilerplate code in `Code.gs`.
 3. Open [`gas/Code.gs`](gas/Code.gs) from this repository, copy its entire content, and paste it into the Apps Script editor.
-4. Click **Save** (💾 icon).
-5. (Optional) Select `setupSheet` from the function dropdown and click **Run** to format the headers.
+4. **Seguridad (Recomendado)**: Define una clave secreta en la variable `const SECRET_API_KEY = 'TuClaveSecreta';` en la parte superior del archivo (o agrégala en *Configuración del proyecto* > *Propiedades de la secuencia de comandos* con la propiedad `API_KEY`). Esto garantizará que nadie pueda acceder ni modificar tus guardias sin dicha clave.
+5. Click **Save** (💾 icon).
+6. (Optional) Select `setupSheet` from the function dropdown and click **Run** to format the headers.
 
 ### Step 3: Deploy as a Web App
 1. Click the blue **Deploy** button (top right) > **New deployment** (*Nueva implementación*).
@@ -114,7 +115,7 @@ Follow these steps to link BleepSync to your private Google Sheet:
    - **Description**: `BleepSync API v1`
    - **Execute as**: `Me (your_email@gmail.com)`
    - **Who has access**: `Anyone` (*Cualquiera*)
-     > **Note**: Choosing *Anyone* is required so that your PWA client can communicate with the endpoint without OAuth popups. Your Google Sheet remains private; only this script has access to read and write rows.
+     > **Note**: Choosing *Anyone* allows your PWA client to communicate with the endpoint without complex OAuth login flows. Tu Google Sheet permanece 100% privado en tu Google Drive; además, con la clave secreta `SECRET_API_KEY`, cualquier intento de acceso sin autorización es rechazado.
 4. Click **Deploy**.
 5. Grant permissions when prompted by Google (click *Advanced* > *Go to BleepSync (unsafe)* > *Allow*).
 6. Copy the generated **Web app URL** (format: `https://script.google.com/macros/s/AKfycb.../exec`).
@@ -123,8 +124,9 @@ Follow these steps to link BleepSync to your private Google Sheet:
 1. Open the BleepSync PWA in your browser.
 2. Tap the **Settings icon (⚙️)** in the top navigation bar.
 3. Paste your Web App URL into the **URL del Web App (Google Apps Script)** field.
-4. Tap **Guardar Ajustes**.
-5. Tap **Descargar de Google Sheet** to verify connectivity!
+4. If you configured a `SECRET_API_KEY`, enter it in the **Clave de Seguridad (API Key / Token)** field.
+5. Tap **Guardar Ajustes**.
+6. Tap **Descargar de Google Sheet** to verify connectivity!
 
 ---
 

@@ -62,6 +62,28 @@ import { ShiftService } from '../../services/shift.service';
             </p>
           </div>
 
+          <!-- Google Apps Script API Key input -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label for="gasApiKeyInput" class="block font-semibold text-slate-200 text-xs uppercase tracking-wider">
+                Clave de Seguridad (API Key / Token)
+              </label>
+              <span class="text-[10px] text-emerald-400 font-medium bg-emerald-950/60 border border-emerald-800/40 px-1.5 py-0.5 rounded">
+                Protección Privada
+              </span>
+            </div>
+            <input
+              type="password"
+              id="gasApiKeyInput"
+              [(ngModel)]="gasApiKey"
+              placeholder="Clave secreta configurada en Code.gs"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500 transition"
+            />
+            <p class="text-[11px] text-slate-400">
+              Evita accesos no autorizados a tu Google Sheet. Si definiste <code class="text-emerald-400 bg-slate-950 px-1 py-0.5 rounded">API_KEY</code> en Apps Script, indícala aquí.
+            </p>
+          </div>
+
           <!-- Cloud Sync Actions -->
           <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800 space-y-2.5">
             <span class="text-xs font-semibold text-slate-300 block">Acciones de Sincronización</span>
@@ -187,6 +209,7 @@ export class ConfigModalComponent {
   readonly close = output<void>();
 
   gasUrl = this.shiftService.config().gasEndpointUrl;
+  gasApiKey = this.shiftService.config().gasApiKey || '';
   surgeonName = this.shiftService.config().currentSurgeonName;
   hapticEnabled = this.shiftService.config().hapticFeedbackEnabled;
   autoSync = this.shiftService.config().autoSyncOnReconnect;
@@ -198,6 +221,7 @@ export class ConfigModalComponent {
   saveConfiguration(): void {
     this.shiftService.updateConfig({
       gasEndpointUrl: this.gasUrl.trim(),
+      gasApiKey: this.gasApiKey.trim(),
       currentSurgeonName: this.surgeonName.trim() || 'Cirujano de Guardia',
       hapticFeedbackEnabled: this.hapticEnabled,
       autoSyncOnReconnect: this.autoSync,
