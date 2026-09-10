@@ -3,6 +3,7 @@ import { Shift, AppConfig } from '../models/shift.model';
 
 export const STORAGE_KEY_SHIFTS = 'bleepsync_shifts_v1';
 export const STORAGE_KEY_CONFIG = 'bleepsync_config_v1';
+export const STORAGE_KEY_DELETED_IDS = 'bleepsync_deleted_shifts_v1';
 
 @Injectable({
   providedIn: 'root',
@@ -51,6 +52,48 @@ export class ShiftStorageService {
   }
 
   /**
+   * Load IDs of shifts that were deleted locally and are pending sync to Google Drive
+   */
+  loadDeletedShiftIds(): string[] {
+    if (typeof window === 'undefined' || !window.localStorage) return [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_DELETED_IDS);
+      return raw ? JSON.parse(raw) : [];
+    } catch (err) {
+      console.error('Failed to load deleted shift IDs from localStorage:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Add deleted shift IDs to track deletions offline
+   */
+  addDeletedShiftIds(ids: string[]): void {
+    if (typeof window === 'undefined' || !window.localStorage || ids.length === 0) return;
+    try {
+      const current = new Set(this.loadDeletedShiftIds());
+      for (const id of ids) {
+        current.add(id);
+      }
+      localStorage.setItem(STORAGE_KEY_DELETED_IDS, JSON.stringify(Array.from(current)));
+    } catch (err) {
+      console.error('Failed to save deleted shift IDs to localStorage:', err);
+    }
+  }
+
+  /**
+   * Clear the list of pending deleted shift IDs after successful Drive sync
+   */
+  clearDeletedShiftIds(): void {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      localStorage.removeItem(STORAGE_KEY_DELETED_IDS);
+    } catch (err) {
+      console.error('Failed to clear deleted shift IDs from localStorage:', err);
+    }
+  }
+
+  /**
    * Load app config from browser storage
    */
   loadConfig(): Partial<AppConfig> | null {
@@ -80,4 +123,3 @@ export class ShiftStorageService {
     }
   }
 }
-

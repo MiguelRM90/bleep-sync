@@ -36,7 +36,6 @@ export class GoogleDriveSyncService {
   async findOrCreateSpreadsheet(accessToken: string): Promise<string> {
     const cachedId = this.spreadsheetId();
     if (cachedId) {
-      // Quick verify that the cached sheet still exists
       const exists = await this.verifySpreadsheetExists(accessToken, cachedId);
       if (exists) return cachedId;
     }
@@ -167,13 +166,36 @@ export class GoogleDriveSyncService {
   }
 
   /**
-   * Upsert shifts to the Google Sheet (merges remote and local rows idempotently)
+   * Clear all data rows in the Google Sheet (A2:G), preserving header row
+   */
+  async clearRemoteDataRows(accessToken: string, spreadsheetId: string): Promise<void> {
+    const clearUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
+      `${SHEET_NAME}!A2:G`
+    )}:clear`;
+
+    const res = await fetch(clearUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn(`Could not clear remote sheet rows: ${res.status} ${errText}`);
+    }
+  }
+
+  /**
+   * Upsert and synchronize shifts to Google Sheet (merges remote and local rows, removes deleted rows)
    */
   async upsertShifts(
     accessToken: string,
     spreadsheetId: string,
     shiftsToSync: Shift[],
-    allLocalShifts: Shift[]
+    allLocalShifts: Shift[],
+    deletedShiftIds: string[] = []
   ): Promise<void> {
     // 1. Fetch current remote shifts
     let existingShifts: Shift[] = [];
@@ -183,16 +205,24 @@ export class GoogleDriveSyncService {
       console.warn('Could not read existing remote shifts before upsert, will proceed with local data:', e);
     }
 
-    // 2. Build map of ID -> Shift (preferring newer/updated)
+    const deletedSet = new Set(deletedShiftIds);
+
+    // 2. Build map of ID -> Shift (excluding any deleted ones)
     const map = new Map<string, Shift>();
     for (const shift of existingShifts) {
-      map.set(shift.id, shift);
+      if (!deletedSet.has(shift.id)) {
+        map.set(shift.id, shift);
+      }
     }
     for (const shift of allLocalShifts) {
-      map.set(shift.id, shift);
+      if (!deletedSet.has(shift.id)) {
+        map.set(shift.id, shift);
+      }
     }
     for (const shift of shiftsToSync) {
-      map.set(shift.id, shift);
+      if (!deletedSet.has(shift.id)) {
+        map.set(shift.id, shift);
+      }
     }
 
     // 3. Sort chronologically (date descending)
@@ -202,7 +232,14 @@ export class GoogleDriveSyncService {
       return (b.createdAt || '').localeCompare(a.createdAt || '');
     });
 
-    // 4. Format rows for Google Sheets API
+    // 4. Always clear A2:G before rewriting so deleted rows disappear completely
+    await this.clearRemoteDataRows(accessToken, spreadsheetId);
+
+    if (mergedList.length === 0) {
+      return;
+    }
+
+    // 5. Format rows for Google Sheets API
     const nowIso = new Date().toISOString();
     const rows = mergedList.map((s) => [
       s.id,
@@ -214,7 +251,7 @@ export class GoogleDriveSyncService {
       nowIso,
     ]);
 
-    // 5. Update range A2:G in sheet
+    // 6. Update range A2:G in sheet
     const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
       `${SHEET_NAME}!A2:G${rows.length + 1}`
     )}?valueInputOption=USER_ENTERED`;

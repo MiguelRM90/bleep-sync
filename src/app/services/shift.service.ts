@@ -168,9 +168,20 @@ export class ShiftService {
    */
   removeColleagueHistory(colleagueName: string): void {
     const trimmed = colleagueName.trim().toLowerCase();
+    const toDeleteIds = this.shifts()
+      .filter((s) => s.colleague.trim().toLowerCase() === trimmed)
+      .map((s) => s.id);
+
     this.shifts.update((current) => current.filter((s) => s.colleague.trim().toLowerCase() !== trimmed));
+    if (toDeleteIds.length > 0) {
+      this.storageService.addDeletedShiftIds(toDeleteIds);
+    }
     this.showToast(`Historial de ${colleagueName} eliminado.`, 'info');
     this.triggerHaptic();
+
+    if (this.isOnline() && this.googleAuthService.isConnected()) {
+      this.syncPendingShifts();
+    }
   }
 
   /**
@@ -200,14 +211,15 @@ export class ShiftService {
    */
   async syncPendingShifts(): Promise<void> {
     const pending = this.shifts().filter((s) => s.syncStatus === 'pending' || s.syncStatus === 'failed');
+    const deletedIds = this.storageService.loadDeletedShiftIds();
 
     if (!this.googleAuthService.isConnected()) {
       this.showToast('Conecta tu Google Drive en Ajustes para sincronizar.', 'info');
       return;
     }
 
-    if (pending.length === 0) {
-      this.showToast('No hay guardias pendientes de sincronización.', 'info');
+    if (pending.length === 0 && deletedIds.length === 0) {
+      this.showToast('No hay cambios pendientes de sincronización.', 'info');
       return;
     }
 
@@ -222,7 +234,10 @@ export class ShiftService {
 
       const token = await this.googleAuthService.getValidToken();
       const spreadsheetId = await this.googleDriveSyncService.findOrCreateSpreadsheet(token);
-      await this.googleDriveSyncService.upsertShifts(token, spreadsheetId, pending, this.shifts());
+      await this.googleDriveSyncService.upsertShifts(token, spreadsheetId, pending, this.shifts(), deletedIds);
+
+      // Successfully synced deletions
+      this.storageService.clearDeletedShiftIds();
 
       const syncedIds = new Set(pending.map((s) => s.id));
       const nowIso = new Date().toISOString();
@@ -234,7 +249,7 @@ export class ShiftService {
         )
       );
       this.lastSyncTimestamp.set(new Date());
-      this.showToast(`¡Sincronizadas ${pending.length} guardias con tu Google Drive!`, 'success');
+      this.showToast('¡Sincronización con Google Drive completada!', 'success');
     } catch (err: unknown) {
       console.error('Batch sync error with Google Drive:', err);
       const errMsg = err instanceof Error ? err.message : 'Error al conectar con Google Drive';
@@ -302,11 +317,13 @@ export class ShiftService {
 
       const token = await this.googleAuthService.getValidToken();
       const spreadsheetId = await this.googleDriveSyncService.findOrCreateSpreadsheet(token);
+      const deletedIds = new Set(this.storageService.loadDeletedShiftIds());
       const remoteShifts = await this.googleDriveSyncService.fetchRemoteShifts(token, spreadsheetId);
+      const validRemoteShifts = remoteShifts.filter((rem) => !deletedIds.has(rem.id));
 
       // Merge remote shifts with local shifts (preserving local pending changes)
       const localMap = new Map(this.shifts().map((s) => [s.id, s]));
-      for (const rem of remoteShifts) {
+      for (const rem of validRemoteShifts) {
         if (!localMap.has(rem.id)) {
           localMap.set(rem.id, rem);
         } else {
@@ -320,7 +337,7 @@ export class ShiftService {
 
       this.shifts.set(Array.from(localMap.values()));
       this.lastSyncTimestamp.set(new Date());
-      this.showToast(`Sincronización completa: ${remoteShifts.length} guardias cargadas de Drive`, 'success');
+      this.showToast(`Sincronización completa: ${validRemoteShifts.length} guardias cargadas de Drive`, 'success');
     } catch (err: unknown) {
       console.error('Fetch remote shifts error:', err);
       const errMsg = err instanceof Error ? err.message : 'Error al obtener guardias de Google Drive';
@@ -337,7 +354,12 @@ export class ShiftService {
   deleteShift(id: string): void {
     this.triggerHaptic();
     this.shifts.update((current) => current.filter((s) => s.id !== id));
+    this.storageService.addDeletedShiftIds([id]);
     this.showToast('Guardia eliminada.', 'info');
+
+    if (this.isOnline() && this.googleAuthService.isConnected()) {
+      this.syncPendingShifts();
+    }
   }
 
   /**
@@ -382,11 +404,29 @@ export class ShiftService {
   /**
    * Reset all shift data to a clean slate
    */
-  resetData(): void {
+  async resetData(): Promise<void> {
+    const allIds = this.shifts().map((s) => s.id);
     this.shifts.set([]);
     this.storageService.clearShifts();
-    this.showToast('Historial de guardias vaciado correctamente.', 'info');
     this.triggerHaptic();
+
+    if (this.isOnline() && this.googleAuthService.isConnected()) {
+      try {
+        const token = await this.googleAuthService.getValidToken();
+        const spreadsheetId = await this.googleDriveSyncService.findOrCreateSpreadsheet(token);
+        await this.googleDriveSyncService.clearRemoteDataRows(token, spreadsheetId);
+        this.storageService.clearDeletedShiftIds();
+        this.showToast('Historial vaciado en local y en Google Drive.', 'info');
+      } catch (err) {
+        console.error('Failed to clear remote sheet on reset:', err);
+        this.showToast('Historial de guardias vaciado en local.', 'info');
+      }
+    } else {
+      if (allIds.length > 0) {
+        this.storageService.addDeletedShiftIds(allIds);
+      }
+      this.showToast('Historial de guardias vaciado en local.', 'info');
+    }
   }
 
   /**
