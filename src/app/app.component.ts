@@ -7,6 +7,7 @@ import { MetricsSummaryComponent } from './components/metrics-summary/metrics-su
 import { ConfigModalComponent } from './components/config-modal/config-modal.component';
 import { ShiftService } from './services/shift.service';
 import { DutyRole } from './models/shift.model';
+import { BeforeInstallPromptEvent } from './models/pwa.model';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +25,7 @@ import { DutyRole } from './models/shift.model';
 export class AppComponent {
   readonly shiftService = inject(ShiftService);
   readonly isConfigOpen = signal<boolean>(false);
-  readonly deferredPrompt = signal<any>(null);
+  readonly deferredPrompt = signal<BeforeInstallPromptEvent | null>(null);
 
   // ViewChild reference to DutyLoggerComponent
   private readonly dutyLogger = viewChild(DutyLoggerComponent);
@@ -32,9 +33,9 @@ export class AppComponent {
   constructor() {
     // Capture beforeinstallprompt for mobile PWA installation UX
     if (typeof window !== 'undefined') {
-      window.addEventListener('beforeinstallprompt', (e) => {
+      window.addEventListener('beforeinstallprompt', (e: Event) => {
         e.preventDefault();
-        this.deferredPrompt.set(e);
+        this.deferredPrompt.set(e as BeforeInstallPromptEvent);
       });
     }
   }

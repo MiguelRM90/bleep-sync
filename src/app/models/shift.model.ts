@@ -38,10 +38,13 @@ export interface Recommendation {
 }
 
 export interface AppConfig {
-  gasEndpointUrl: string;
-  gasApiKey?: string;
   currentSurgeonName: string;
   autoSyncOnReconnect: boolean;
   hapticFeedbackEnabled: boolean;
+  googleConnected: boolean;
+  googleUserEmail?: string;
+  googleUserName?: string;
+  googleUserPicture?: string;
+  googleSpreadsheetId?: string;
 }
 

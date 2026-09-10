@@ -2,7 +2,7 @@
 
 > **Intelligent, offline-first on-call surgical pager synchronization and duty balance Progressive Web App (PWA).**
 
-BleepSync is tailored for on-call surgical teams (such as General Surgery in Spain) who rotate duties between **Planta** (Ward / Hospitalization) and **Urgencias** (Emergency Department / Urgent ORs). It ensures equitable duty rotation among attending surgeons ("Adjuntos"), functions seamlessly in lead-lined surgical blocks and basement emergency wards without network connectivity, and syncs automatically with a private Google Sheet via a Google Apps Script Web App.
+BleepSync is tailored for on-call surgical teams (such as General Surgery in Spain) who rotate duties between **Planta** (Ward / Hospitalization) and **Urgencias** (Emergency Department / Urgent ORs). It ensures equitable duty rotation among attending surgeons ("Adjuntos"), functions seamlessly in lead-lined surgical blocks and basement emergency wards without network connectivity, and syncs automatically with a private Google Sheet in the user's personal Google Drive via native Google OAuth 2.0.
 
 ---
 
@@ -27,10 +27,11 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 4. **Duty Balance & Imbalance Flags**:
    - Visual Planta vs. Urgencias ratio bar for each colleague.
    - Imbalance alerts when one colleague has carried a skewed percentage of emergency or ward duties.
-5. **Private Serverless Backend (Google Sheets & Apps Script)**:
-   - Zero recurring server costs, private data ownership, and instant spreadsheet analysis.
-   - Built-in CORS and HTTP redirect resilience (`redirect: 'follow'` with `text/plain` JSON payload).
-   - Optional API Key authorization token preventing unauthorized access to duty logs and clinical notes.
+5. **Native Google Drive & Sheets Backup (OAuth 2.0)**:
+   - Zero recurring server costs, zero middleman databases, and private data sovereignty.
+   - 1-Click mobile connection via Google Identity Services (GIS).
+   - Automatic creation and background synchronization of the `Guardias BleepSync` spreadsheet.
+   - Sandboxed with minimum-privilege `drive.file` scope (the app cannot read personal emails, photos, or documents).
 
 ---
 
@@ -47,23 +48,20 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 │             ├───────────────► LocalStorage (Resilient Cache)│
 │             ▼                                               │
 │    ShiftService (State & Queue)                             │
+│             │                                               │
+│             ├───────────────► GoogleAuthService (GIS OAuth) │
+│             ▼                                               │
+│    GoogleDriveSyncService                                   │
 └─────────────┬───────────────────────────────────────────────┘
-              │ (Online / Background Sync)
-              │ POST / GET (text/plain, redirect: 'follow')
+              │ (HTTPS / Bearer Access Token)
+              │ Direct Google Sheets API v4 & Drive API v3
               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│               Google Cloud Platform / Workspace             │
+│                     Google Cloud Platform                   │
 │  ┌───────────────────────────────────────────────────────┐  │
-│  │ Google Apps Script (Web App: gas/Code.gs)             │  │
-│  │ - doGet(e)   -> Reads rows from Sheet                 │  │
-│  │ - doPost(e)  -> Upserts single or batch shifts        │  │
-│  │ - Authorization: Token validation via SECRET_API_KEY  │  │
-│  └──────────────────────────┬────────────────────────────┘  │
-│                             │                               │
-│                             ▼                               │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ Private Google Sheet ("Guardias")                     │  │
-│  │ Columns: ID | Date | Colleague | Role | Notes | ...   │  │
+│  │ Private User Google Drive                             │  │
+│  │ └── Spreadsheet: "Guardias BleepSync"                 │  │
+│  │     └── Tab: "Guardias" (ID, Fecha, Adjunto, Rol...) │  │
 │  └───────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -94,43 +92,17 @@ Navigate to `http://localhost:4200` in your browser.
 
 ---
 
-## 📊 Google Sheets & Apps Script Backend Deployment
+## 📊 Google Drive Cloud Backup (1-Click OAuth Setup)
 
-> 💡 **Looking for a non-technical step-by-step setup tutorial?** Check out the **[Google Drive Setup Guide (in Spanish)](GUIA_GOOGLE_DRIVE.md)** designed with clear explanations for non-technical users.
+> 💡 **Looking for a non-technical step-by-step setup tutorial?** Check out the **[Google Drive Setup Guide (in Spanish)](docs/GUIA_GOOGLE_DRIVE.md)** designed with clear explanations for non-technical users.
 
-Follow these steps to link BleepSync to your private Google Sheet:
+BleepSync connects directly to Google Drive without intermediate servers or manual script pasting:
 
-### Step 1: Create the Google Sheet
-1. Open [Google Sheets](https://sheets.new) and create a new spreadsheet named **BleepSync - Control de Guardias**.
-2. Rename the first sheet tab to **`Guardias`** (or let the script create it automatically).
-
-### Step 2: Add the Google Apps Script Code
-1. In your Google Sheet, click **Extensions** > **Apps Script** (*Extensiones* > *Apps Script*).
-2. Delete any boilerplate code in `Code.gs`.
-3. Open [`gas/Code.gs`](gas/Code.gs) from this repository, copy its entire content, and paste it into the Apps Script editor.
-4. **Security (Recommended)**: Set a secret passphrase in the variable `const SECRET_API_KEY = 'YourSecretKey';` at the top of the file (or configure it in *Project Settings* > *Script Properties* with the property `API_KEY`). This ensures that no unauthorized requests can read or alter your duty records.
-5. Click **Save** (💾 icon).
-6. (Optional) Select `setupSheet` from the function dropdown and click **Run** to format the headers.
-
-### Step 3: Deploy as a Web App
-1. Click the blue **Deploy** button (top right) > **New deployment** (*Nueva implementación*).
-2. Click the gear icon ⚙️ next to "Select type" and select **Web app**.
-3. Fill in the deployment details:
-   - **Description**: `BleepSync API v1`
-   - **Execute as**: `Me (your_email@gmail.com)`
-   - **Who has access**: `Anyone` (*Cualquiera*)
-     > **Note**: Selecting *Anyone* allows your mobile PWA client to communicate with the endpoint without complex OAuth login prompts. Your Google Sheet remains 100% private in your personal Google Drive; moreover, with `SECRET_API_KEY` configured, any unauthorized request is strictly blocked.
-4. Click **Deploy**.
-5. Grant permissions when prompted by Google (click *Advanced* > *Go to BleepSync (unsafe)* > *Allow*).
-6. Copy the generated **Web app URL** (format: `https://script.google.com/macros/s/AKfycb.../exec`).
-
-### Step 4: Configure BleepSync
-1. Open the BleepSync PWA in your browser or phone.
+1. Open BleepSync on your mobile phone or browser.
 2. Tap the **Settings icon (⚙️)** in the top navigation bar.
-3. Paste your Web App URL into the **URL del Web App (Google Apps Script)** field.
-4. If you configured a `SECRET_API_KEY`, enter it in the **Clave de Seguridad (API Key / Contraseña)** field.
-5. Tap **Guardar Ajustes** (*Save Settings*).
-6. Tap **Descargar de Google Sheet** (*Fetch Remote*) to verify connectivity!
+3. Under **Copia de Seguridad en Google Drive**, tap **Conectar con Google Drive**.
+4. Authorize with your Google account.
+5. That's it! BleepSync automatically creates the `Guardias BleepSync` spreadsheet in your private Google Drive and synchronizes your duty shifts.
 
 ---
 
@@ -171,9 +143,14 @@ npm run build:gh-pages
 
 ## 🛡️ Technical Highlights & CORS Resilience
 
-- **No CORS Preflights**: Google Apps Script endpoints do not respond to HTTP `OPTIONS` preflight requests. BleepSync sends payloads using `Content-Type: text/plain;charset=utf-8` containing `JSON.stringify(payload)`. This bypasses browser preflight checks while still allowing JSON deserialization in Google Apps Script.
-- **HTTP 302 Follow**: Google Apps Script redirects API calls to `script.googleusercontent.com` with a `302 Found` status. All requests in `ShiftService` use `redirect: 'follow'`.
+- **Google Identity Services (GIS) & Sheets API v4**: Direct client-to-Google communication via short-lived, encrypted OAuth 2.0 access tokens. No intermediate server or third-party storage.
+- **Sandboxed Security**: Minimum privilege `drive.file` scope sandboxes access strictly to `Guardias BleepSync` created by the app.
 - **Zero NgModules**: 100% built with modern Angular standalone components and Signals (`signal`, `computed`, `effect`).
+
+---
+
+## 🔒 Privacy Policy
+Read our full [Privacy Policy (Política de Privacidad)](docs/PRIVACY_POLICY.md). BleepSync adheres to Google API Services User Data Policy, including Limited Use requirements.
 
 ---
 

@@ -2,7 +2,8 @@ import { Component, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShiftService } from '../../services/shift.service';
-import { GAS_CODE_GS } from '../../constants/gas-code.constant';
+import { GoogleAuthService } from '../../services/google-auth.service';
+import { GoogleDriveSyncService } from '../../services/google-drive-sync.service';
 
 @Component({
   selector: 'app-config-modal',
@@ -12,13 +13,12 @@ import { GAS_CODE_GS } from '../../constants/gas-code.constant';
 })
 export class ConfigModalComponent {
   readonly shiftService = inject(ShiftService);
+  readonly googleAuth = inject(GoogleAuthService);
+  readonly googleDriveSync = inject(GoogleDriveSyncService);
   readonly close = output<void>();
 
-  showGuide = signal<boolean>(false);
-  isGasCodeCopied = signal<boolean>(false);
+  showPrivacyDetails = signal<boolean>(false);
 
-  gasUrl = this.shiftService.config().gasEndpointUrl;
-  gasApiKey = this.shiftService.config().gasApiKey || '';
   surgeonName = this.shiftService.config().currentSurgeonName;
   hapticEnabled = this.shiftService.config().hapticFeedbackEnabled;
   autoSync = this.shiftService.config().autoSyncOnReconnect;
@@ -27,27 +27,48 @@ export class ConfigModalComponent {
     this.close.emit();
   }
 
-  async copyGasCode(): Promise<void> {
+  async connectGoogle(): Promise<void> {
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(GAS_CODE_GS);
-        this.isGasCodeCopied.set(true);
-        this.shiftService.showToast('¡Código de gas/Code.gs copiado al portapapeles! Listo para pegar en Google.', 'success');
-        this.shiftService.triggerHaptic();
-        setTimeout(() => {
-          this.isGasCodeCopied.set(false);
-        }, 3000);
+      this.shiftService.triggerHaptic();
+      const token = await this.googleAuth.login();
+      this.shiftService.showToast('¡Conectado a Google con éxito!', 'success');
+
+      // Ensure spreadsheet is linked and sync
+      const sheetId = await this.googleDriveSync.findOrCreateSpreadsheet(token);
+      this.shiftService.updateConfig({ googleConnected: true, googleSpreadsheetId: sheetId });
+
+      // Automatically sync shifts
+      await this.shiftService.fetchRemoteShifts();
+      if (this.shiftService.pendingSyncCount() > 0) {
+        await this.shiftService.syncPendingShifts();
       }
-    } catch (err) {
-      console.error('Failed to copy GAS code to clipboard:', err);
-      this.shiftService.showToast('Error al copiar al portapapeles.', 'error');
+    } catch (err: unknown) {
+      console.error('Google connection error:', err);
+      const msg = err instanceof Error ? err.message : 'No se pudo completar la conexión con Google.';
+      this.shiftService.showToast(msg, 'error');
+    }
+  }
+
+  disconnectGoogle(): void {
+    if (confirm('¿Deseas desconectar tu cuenta de Google Drive? Tus guardias guardadas en el móvil no se borrarán.')) {
+      this.shiftService.triggerHaptic();
+      this.googleAuth.logout();
+      this.shiftService.updateConfig({ googleConnected: false, googleSpreadsheetId: undefined });
+      this.shiftService.showToast('Cuenta de Google desconectada.', 'info');
+    }
+  }
+
+  openSheetInDrive(): void {
+    const url = this.googleDriveSync.sheetUrl();
+    if (url && typeof window !== 'undefined') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      this.shiftService.showToast('Aún no se ha creado la hoja en Drive. Pulsa Sincronizar.', 'info');
     }
   }
 
   saveConfiguration(): void {
     this.shiftService.updateConfig({
-      gasEndpointUrl: this.gasUrl.trim(),
-      gasApiKey: this.gasApiKey.trim(),
       currentSurgeonName: this.surgeonName.trim() || 'Cirujano de Guardia',
       hapticFeedbackEnabled: this.hapticEnabled,
       autoSyncOnReconnect: this.autoSync,

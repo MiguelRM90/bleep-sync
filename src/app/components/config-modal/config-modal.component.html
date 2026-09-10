@@ -33,214 +33,167 @@
       </button>
     </div>
 
-    <!-- Modal Body (Scrollable with ample vertical gap) -->
+    <!-- Modal Body (Scrollable) -->
     <div class="p-5 sm:p-7 overflow-y-auto flex flex-col gap-6 text-sm flex-1">
 
-      <!-- Friendly Guide Banner -->
-      <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-900 border border-emerald-500/30 flex items-center justify-between gap-4 shadow-md">
-        <div class="flex items-center gap-3.5">
-          <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
-            📖
-          </span>
-          <div>
-            <h4 class="text-sm font-bold text-slate-100">¿Primera vez conectando Google Drive?</h4>
-            <p class="text-xs text-slate-300 mt-1">Guía paso a paso explicada de forma sencilla.</p>
+      <!-- Google Drive Cloud Card -->
+      <div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/80 shadow-lg flex flex-col gap-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">☁️</span>
+            <div>
+              <h4 class="text-sm font-bold text-slate-100">Copia de Seguridad en Google Drive</h4>
+              <p class="text-xs text-slate-400">Tus guardias sincronizadas en una hoja de Google Sheets</p>
+            </div>
           </div>
-        </div>
-        <button
-          type="button"
-          (click)="showGuide.set(!showGuide())"
-          class="btn-primary shrink-0"
-        >
-          {{ showGuide() ? 'Ocultar Guía' : 'Ver Guía' }}
-        </button>
-      </div>
-
-      <!-- Step by Step Guide Card (Expandable) -->
-      @if (showGuide()) {
-        <div class="p-5 sm:p-6 rounded-2xl bg-slate-950/90 border border-emerald-500/40 flex flex-col gap-5 animate-fade-in text-xs text-slate-200 shadow-inner">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <span class="font-bold text-sm text-emerald-400 flex items-center gap-2">
-              ✨ Conectar con tu Google Drive en 5 pasos
+          @if (googleAuth.isConnected()) {
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Conectado
             </span>
-            <span class="text-[11px] text-slate-400">Totalmente privado</span>
-          </div>
+          } @else {
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+              Sin conectar
+            </span>
+          }
+        </div>
 
-          <!-- Step 1 -->
-          <div class="flex items-start gap-3.5 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80">
-            <span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">1</span>
-            <div class="space-y-1">
-              <p class="font-bold text-slate-100 text-sm">Crea una hoja de cálculo en tu Google Drive</p>
-              <p class="text-slate-300 leading-relaxed">
-                Abre <a href="https://sheets.new" target="_blank" rel="noopener" class="text-emerald-400 underline hover:text-emerald-300 font-semibold">sheets.new</a> en el navegador y ponle de nombre <strong>"Guardias"</strong>.
+        <!-- NOT CONNECTED STATE -->
+        @if (!googleAuth.isConnected()) {
+          <div class="flex flex-col gap-4">
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Conecta tu cuenta de Google con <strong>un solo clic</strong> desde tu móvil o PC. BleepSync creará automáticamente la hoja <strong>«Guardias BleepSync»</strong> en tu Google Drive y mantendrá tus turnos siempre sincronizados, incluso si estás en quirófano sin cobertura.
+            </p>
+
+            <button
+              type="button"
+              (click)="connectGoogle()"
+              [disabled]="googleAuth.isAuthenticating()"
+              class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-white hover:bg-slate-100 text-slate-900 transition active:scale-[0.98] shadow-md flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              @if (googleAuth.isAuthenticating()) {
+                <span class="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></span>
+                <span>Conectando con Google...</span>
+              } @else {
+                <!-- Official Google "G" Icon -->
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.58-5.17 3.58-9.12z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.33 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+                </svg>
+                <span>Conectar con Google Drive</span>
+              }
+            </button>
+
+            <!-- Security & Privacy Guarantee Note -->
+            <div class="p-3.5 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
+              <span class="text-emerald-400 text-sm mt-0.5">🔒</span>
+              <p class="leading-relaxed">
+                <strong>100% privado y seguro:</strong> BleepSync solo puede acceder a la hoja de cálculo que crea para tus guardias. No tiene acceso a tus correos, fotos ni a ningún otro archivo de tu Google Drive.
               </p>
             </div>
           </div>
+        }
 
-          <!-- Step 2 -->
-          <div class="flex items-start gap-3.5 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80">
-            <span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">2</span>
-            <div class="space-y-1">
-              <p class="font-bold text-slate-100 text-sm">Abre el editor de Google</p>
-              <p class="text-slate-300 leading-relaxed">
-                En el menú superior de tu hoja de cálculo, pulsa en <strong>Extensiones</strong> y luego en <strong>Apps Script</strong>.
-              </p>
-            </div>
-          </div>
-
-          <!-- Step 3: Direct One-Click Copy -->
-          <div class="flex items-start gap-3.5 bg-slate-900/90 p-4 rounded-xl border border-emerald-500/30">
-            <span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">3</span>
-            <div class="flex-1 space-y-2.5">
-              <p class="font-bold text-slate-100 text-sm">Pega el código de conexión</p>
-              <p class="text-slate-300 leading-relaxed">
-                Borra cualquier texto que aparezca en el editor y pega el código del script. Pulsa el botón de abajo para copiarlo al instante sin tener que buscarlo en GitHub:
-              </p>
-              <div>
-                <button
-                  type="button"
-                  (click)="copyGasCode()"
-                  class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold transition active:scale-[0.97] border shadow-sm cursor-pointer inline-flex items-center justify-center gap-2"
-                  [ngClass]="{
-                    'bg-emerald-500 text-slate-950 border-emerald-400 shadow-emerald-950/40 font-extrabold': isGasCodeCopied(),
-                    'bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border-emerald-500/50 hover:border-emerald-400': !isGasCodeCopied()
-                  }"
-                >
-                  @if (isGasCodeCopied()) {
-                    <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>¡Código copiado al portapapeles!</span>
-                  } @else {
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    <span>📋 Copiar código de gas/Code.gs</span>
-                  }
-                </button>
+        <!-- CONNECTED STATE -->
+        @if (googleAuth.isConnected()) {
+          <div class="flex flex-col gap-5">
+            <!-- User Profile Card -->
+            <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                @if (googleAuth.userProfile()?.picture) {
+                  <img
+                    [src]="googleAuth.userProfile()!.picture"
+                    alt="Avatar"
+                    class="w-10 h-10 rounded-full border border-emerald-500/40 object-cover shrink-0"
+                  />
+                } @else {
+                  <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center border border-emerald-500/30 shrink-0">
+                    {{ (googleAuth.userProfile()?.name || 'D').charAt(0).toUpperCase() }}
+                  </div>
+                }
+                <div class="min-w-0">
+                  <p class="text-sm font-bold text-slate-100 truncate">
+                    {{ googleAuth.userProfile()?.name || 'Doctor/a' }}
+                  </p>
+                  <p class="text-xs text-slate-400 truncate">
+                    {{ googleAuth.userProfile()?.email || 'Cuenta de Google activa' }}
+                  </p>
+                </div>
               </div>
-              <p class="text-[11px] text-slate-400 mt-1">
-                Una vez pegado, pulsa el icono del disquete 💾 (Guardar) en la barra de herramientas de Google.
-              </p>
+
+              <button
+                type="button"
+                (click)="disconnectGoogle()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 border border-rose-500/30 transition cursor-pointer shrink-0"
+              >
+                Desconectar
+              </button>
+            </div>
+
+            <!-- Spreadsheet Info & Direct Link -->
+            <div class="flex items-center justify-between p-3.5 bg-emerald-950/20 border border-emerald-500/20 rounded-xl">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">📊</span>
+                <div>
+                  <p class="text-xs font-bold text-slate-200">Hoja: Guardias BleepSync</p>
+                  <p class="text-[11px] text-emerald-400/90">Sincronización en la nube lista</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="openSheetInDrive()"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <span>Abrir en Drive</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Sync Buttons Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                (click)="syncPending()"
+                [disabled]="shiftService.isSyncing()"
+                class="btn-emerald-soft py-2.5 text-xs font-bold flex items-center justify-center gap-2"
+              >
+                @if (shiftService.isSyncing()) {
+                  <span class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+                  <span>Sincronizando...</span>
+                } @else {
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                  </svg>
+                  <span>Subir pendientes ({{ shiftService.pendingSyncCount() }})</span>
+                }
+              </button>
+
+              <button
+                type="button"
+                (click)="fetchRemote()"
+                [disabled]="shiftService.isSyncing()"
+                class="btn-sky-soft py-2.5 text-xs font-bold flex items-center justify-center gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span>Descargar de Google Drive</span>
+              </button>
             </div>
           </div>
-
-          <!-- Step 4 -->
-          <div class="flex items-start gap-3.5 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80">
-            <span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">4</span>
-            <div class="space-y-1">
-              <p class="font-bold text-slate-100 text-sm">Implementar como Aplicación Web</p>
-              <p class="text-slate-300 leading-relaxed">
-                Arriba a la derecha, pulsa el botón azul <strong>Implementar > Nueva implementación</strong>. Elige tipo <strong>Aplicación web</strong>, en <em>"Quién tiene acceso"</em> selecciona <strong>Cualquiera</strong> y dale a <strong>Implementar</strong> (y autoriza con tu cuenta de Google).
-              </p>
-            </div>
-          </div>
-
-          <!-- Step 5 -->
-          <div class="flex items-start gap-3.5 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80">
-            <span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-bold shrink-0 text-xs mt-0.5">5</span>
-            <div class="space-y-1">
-              <p class="font-bold text-slate-100 text-sm">Copia la dirección y pégala abajo</p>
-              <p class="text-slate-300 leading-relaxed">
-                Copia la <strong>URL de la aplicación web</strong> que te muestra Google (termina en <code class="text-emerald-300 font-mono">/exec</code>) y pégala en la casilla de abajo. ¡Y listo!
-              </p>
-            </div>
-          </div>
-
-          <div class="p-3.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-xs text-emerald-200 flex items-center gap-2">
-            <span class="text-base">🔒</span>
-            <span><strong>Privacidad total:</strong> Tu hoja permanece en tu Google Drive personal. Nadie más tiene acceso.</span>
-          </div>
-        </div>
-      }
-
-      <!-- Google Apps Script & Security Card -->
-      <div class="card-subtle flex flex-col gap-5">
-        <div class="flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-emerald-400 pb-1 border-b border-slate-800/70">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path>
-          </svg>
-          <span>Conexión con tu Google Drive</span>
-        </div>
-
-        <!-- URL Input -->
-        <div class="flex flex-col gap-2">
-          <label for="gasUrlInput" class="font-semibold text-slate-200 text-xs uppercase tracking-wider">
-            URL del Web App (Google Apps Script)
-          </label>
-          <input
-            type="url"
-            id="gasUrlInput"
-            [(ngModel)]="gasUrl"
-            placeholder="https://script.google.com/macros/s/.../exec"
-            class="input-clinical font-mono"
-          />
-          <p class="text-xs text-slate-400 leading-normal">
-            Dirección generada al implementar el script en tu Google Drive.
-          </p>
-        </div>
-
-        <!-- API Key Input -->
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center justify-between">
-            <label for="gasApiKeyInput" class="font-semibold text-slate-200 text-xs uppercase tracking-wider">
-              Clave de Seguridad (API Key / Contraseña)
-            </label>
-            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/70 border border-emerald-700/50 px-2 py-0.5 rounded-md">
-              Protección Opcional
-            </span>
-          </div>
-          <input
-            type="password"
-            id="gasApiKeyInput"
-            [(ngModel)]="gasApiKey"
-            placeholder="Contraseña secreta configurada en Code.gs"
-            class="input-clinical font-mono"
-          />
-          <p class="text-xs text-slate-400 leading-normal">
-            Si definiste <code class="text-emerald-400 bg-slate-900 px-1 py-0.5 rounded">SECRET_API_KEY</code> en tu script, escríbela aquí para bloquear cualquier intento no autorizado.
-          </p>
-        </div>
+        }
       </div>
 
-      <!-- Cloud Sync Actions Card -->
-      <div class="card-subtle flex flex-col gap-4">
+      <!-- User Profile & Preferences Card -->
+      <div class="card-subtle flex flex-col gap-5">
         <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
-          Acciones de Sincronización
+          Preferencias de Usuario
         </span>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          <button
-            type="button"
-            (click)="syncPending()"
-            [disabled]="shiftService.isSyncing() || !gasUrl.trim()"
-            class="btn-emerald-soft"
-          >
-            @if (shiftService.isSyncing()) {
-              <span class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
-            } @else {
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-              </svg>
-            }
-            Subir pendientes ({{ shiftService.pendingSyncCount() }})
-          </button>
 
-          <button
-            type="button"
-            (click)="fetchRemote()"
-            [disabled]="shiftService.isSyncing() || !gasUrl.trim()"
-            class="btn-sky-soft"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-            Descargar de Google Sheet
-          </button>
-        </div>
-      </div>
-
-      <!-- User Profile & Options Card -->
-      <div class="card-subtle flex flex-col gap-5">
         <!-- Surgeon Profile Name -->
         <div class="flex flex-col gap-2">
           <label for="surgeonNameInput" class="font-semibold text-slate-200 text-xs uppercase tracking-wider">
@@ -250,74 +203,83 @@
             type="text"
             id="surgeonNameInput"
             [(ngModel)]="surgeonName"
-            placeholder="Ej: Dra. García"
-            class="input-clinical font-medium"
+            placeholder="Ej: Dra. Elena Ramos"
+            class="input-clinical"
           />
+          <p class="text-xs text-slate-400">
+            Identificador en la pantalla principal.
+          </p>
         </div>
 
-        <!-- Preferences Toggles -->
-        <div class="flex flex-col gap-3 pt-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
-            Opciones del Dispositivo
-          </span>
+        <!-- Auto Sync Toggle -->
+        <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-800/40 transition">
+          <div class="flex flex-col gap-0.5">
+            <span class="font-semibold text-slate-200 text-xs">Sincronización automática al recuperar cobertura</span>
+            <span class="text-[11px] text-slate-400">
+              Sincroniza en segundo plano al salir de quirófanos o plantas sin señal.
+            </span>
+          </div>
+          <input
+            type="checkbox"
+            [(ngModel)]="autoSync"
+            class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-slate-900 cursor-pointer"
+          />
+        </label>
 
-          <!-- Haptic toggle -->
-          <label class="flex items-center justify-between p-4 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-            <div class="pr-3">
-              <span class="text-xs sm:text-sm font-semibold text-slate-200 block">Respuesta Háptica (Vibración)</span>
-              <span class="text-[11px] sm:text-xs text-slate-400 mt-0.5 block">Vibración táctil al registrar y seleccionar guardia</span>
-            </div>
-            <input
-              type="checkbox"
-              [(ngModel)]="hapticEnabled"
-              class="w-5 h-5 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-700 cursor-pointer shrink-0"
-            />
-          </label>
+        <!-- Haptic Feedback Toggle -->
+        <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-800/40 transition">
+          <div class="flex flex-col gap-0.5">
+            <span class="font-semibold text-slate-200 text-xs">Vibración háptica</span>
+            <span class="text-[11px] text-slate-400">
+              Vibración táctil al registrar guardias y pulsar botones en el móvil.
+            </span>
+          </div>
+          <input
+            type="checkbox"
+            [(ngModel)]="hapticEnabled"
+            class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-slate-900 cursor-pointer"
+          />
+        </label>
+      </div>
 
-          <!-- Auto-sync toggle -->
-          <label class="flex items-center justify-between p-4 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-            <div class="pr-3">
-              <span class="text-xs sm:text-sm font-semibold text-slate-200 block">Autosincronización al volver online</span>
-              <span class="text-[11px] sm:text-xs text-slate-400 mt-0.5 block">Sube automáticamente las guardias guardadas en quirófano</span>
-            </div>
-            <input
-              type="checkbox"
-              [(ngModel)]="autoSync"
-              class="w-5 h-5 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-700 cursor-pointer shrink-0"
-            />
-          </label>
+      <!-- Local Data Management Card -->
+      <div class="card-subtle flex flex-col gap-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
+          Mantenimiento de Datos Locales
+        </span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <button
+            type="button"
+            (click)="restoreDemoData()"
+            class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>🔄</span>
+            <span>Cargar Guardias de Demo</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="clearAllData()"
+            class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-950/20 hover:bg-rose-950/40 text-rose-300 border border-rose-500/30 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>🗑️</span>
+            <span>Borrar Datos Locales</span>
+          </button>
         </div>
       </div>
 
-      <!-- Demo & Reset Section -->
-      <div class="pt-2 pb-1 flex items-center justify-between gap-4">
-        <button
-          type="button"
-          (click)="restoreDemoData()"
-          class="btn-emerald-chip"
-        >
-          Restaurar datos de prueba
-        </button>
-
-        <button
-          type="button"
-          (click)="clearAllData()"
-          class="btn-rose-chip"
-        >
-          Borrar base local
-        </button>
-      </div>
     </div>
 
     <!-- Modal Footer -->
-    <div class="px-6 py-4 border-t border-slate-800 bg-slate-950/95 flex items-center justify-end gap-3 shrink-0">
+    <div class="px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-950/80 backdrop-blur-md shrink-0">
       <button
         type="button"
         (click)="close.emit()"
-        class="btn-secondary"
+        class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
       >
         Cerrar
       </button>
+
       <button
         type="button"
         (click)="saveConfiguration()"

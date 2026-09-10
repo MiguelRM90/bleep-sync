@@ -1,5 +1,7 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed, effect, inject } from '@angular/core';
 import { Shift, DutyRole, ColleagueMetrics, Recommendation, AppConfig, SyncStatus } from '../models/shift.model';
+import { GoogleAuthService } from './google-auth.service';
+import { GoogleDriveSyncService } from './google-drive-sync.service';
 
 const STORAGE_KEY_SHIFTS = 'bleepsync_shifts_v1';
 const STORAGE_KEY_CONFIG = 'bleepsync_config_v1';
@@ -8,6 +10,9 @@ const STORAGE_KEY_CONFIG = 'bleepsync_config_v1';
   providedIn: 'root',
 })
 export class ShiftService {
+  readonly googleAuthService = inject(GoogleAuthService);
+  readonly googleDriveSyncService = inject(GoogleDriveSyncService);
+
   // Reactive Signals for primary state
   readonly shifts = signal<Shift[]>([]);
   readonly isOnline = signal<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -18,11 +23,10 @@ export class ShiftService {
 
   // App Configuration Signal
   readonly config = signal<AppConfig>({
-    gasEndpointUrl: '',
-    gasApiKey: '',
     currentSurgeonName: 'Cirujano de Guardia',
     autoSyncOnReconnect: true,
     hapticFeedbackEnabled: true,
+    googleConnected: false,
   });
 
   // Computed signals
@@ -233,8 +237,8 @@ export class ShiftService {
     this.shifts.update((current) => [newShift, ...current]);
     this.showToast(`Guardia guardada localmente (${newShift.role})`, 'success');
 
-    // Attempt background sync if online & backend configured
-    if (this.isOnline() && this.config().gasEndpointUrl) {
+    // Attempt background sync if online & Google Drive connected
+    if (this.isOnline() && this.googleAuthService.isConnected()) {
       this.syncSingleShift(newShift);
     }
 
@@ -242,44 +246,21 @@ export class ShiftService {
   }
 
   /**
-   * Sync a single shift to Google Apps Script
+   * Sync a single shift to Google Drive / Sheets API
    */
   private async syncSingleShift(shift: Shift): Promise<void> {
-    const url = this.config().gasEndpointUrl.trim();
-    if (!url) return;
+    if (!this.googleAuthService.isConnected()) return;
 
     try {
       this.isSyncing.set(true);
-      const apiKey = this.config().gasApiKey?.trim() || undefined;
-      // Google Apps Script requires text/plain and redirect: 'follow' to avoid CORS preflight
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify({
-          apiKey,
-          action: 'create_shift',
-          payload: shift,
-        }),
-        redirect: 'follow',
-      });
+      const token = await this.googleAuthService.getValidToken();
+      const spreadsheetId = await this.googleDriveSyncService.findOrCreateSpreadsheet(token);
+      await this.googleDriveSyncService.upsertShifts(token, spreadsheetId, [shift], this.shifts());
 
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result && (result.status === 'success' || result.status === 'ok')) {
-        this.updateShiftSyncStatus(shift.id, 'synced');
-        this.lastSyncTimestamp.set(new Date());
-      } else if (result?.errorType === 'unauthorized' || result?.status === 'unauthorized') {
-        throw new Error('Clave de seguridad no válida en Google Apps Script.');
-      } else {
-        throw new Error(result?.message || 'Error en respuesta de Google Apps Script');
-      }
-    } catch (err: any) {
-      console.warn('Sync failed (offline or GAS unreachable):', err);
+      this.updateShiftSyncStatus(shift.id, 'synced');
+      this.lastSyncTimestamp.set(new Date());
+    } catch (err: unknown) {
+      console.warn('Sync single shift failed (offline or Google unreachable):', err);
       this.updateShiftSyncStatus(shift.id, 'failed');
     } finally {
       this.isSyncing.set(false);
@@ -287,19 +268,18 @@ export class ShiftService {
   }
 
   /**
-   * Batch sync all pending shifts to Google Apps Script
+   * Batch sync all pending shifts to Google Drive / Sheets API
    */
   async syncPendingShifts(): Promise<void> {
     const pending = this.shifts().filter((s) => s.syncStatus === 'pending' || s.syncStatus === 'failed');
-    const url = this.config().gasEndpointUrl.trim();
 
-    if (pending.length === 0) {
-      this.showToast('No hay guardias pendientes de sincronización.', 'info');
+    if (!this.googleAuthService.isConnected()) {
+      this.showToast('Conecta tu Google Drive en Ajustes para sincronizar.', 'info');
       return;
     }
 
-    if (!url) {
-      this.showToast('URL de Google Apps Script no configurada.', 'error');
+    if (pending.length === 0) {
+      this.showToast('No hay guardias pendientes de sincronización.', 'info');
       return;
     }
 
@@ -312,58 +292,42 @@ export class ShiftService {
       this.isSyncing.set(true);
       this.syncError.set(null);
 
-      const apiKey = this.config().gasApiKey?.trim() || undefined;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify({
-          apiKey,
-          action: 'batch_sync',
-          payload: pending,
-        }),
-        redirect: 'follow',
-      });
+      const token = await this.googleAuthService.getValidToken();
+      const spreadsheetId = await this.googleDriveSyncService.findOrCreateSpreadsheet(token);
+      await this.googleDriveSyncService.upsertShifts(token, spreadsheetId, pending, this.shifts());
 
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result && (result.status === 'success' || result.status === 'ok')) {
-        // Mark all sent shifts as synced
-        const syncedIds = new Set(pending.map((s) => s.id));
-        this.shifts.update((current) =>
-          current.map((s) =>
-            syncedIds.has(s.id)
-              ? { ...s, syncStatus: 'synced', remoteSyncedAt: new Date().toISOString() }
-              : s
-          )
-        );
-        this.lastSyncTimestamp.set(new Date());
-        this.showToast(`¡Sincronizadas ${pending.length} guardias con Google Sheets!`, 'success');
-      } else if (result?.errorType === 'unauthorized' || result?.status === 'unauthorized') {
-        throw new Error('Clave de seguridad inválida en Google Apps Script.');
-      } else {
-        throw new Error(result?.message || 'Respuesta inválida de Google Apps Script');
-      }
-    } catch (err: any) {
-      console.error('Batch sync error:', err);
-      this.syncError.set(err?.message || 'Error al conectar con Google Sheets');
-      this.showToast('Error al sincronizar con Google Sheets. Reintentará más tarde.', 'error');
+      const syncedIds = new Set(pending.map((s) => s.id));
+      const nowIso = new Date().toISOString();
+      this.shifts.update((current) =>
+        current.map((s) =>
+          syncedIds.has(s.id)
+            ? { ...s, syncStatus: 'synced', remoteSyncedAt: nowIso }
+            : s
+        )
+      );
+      this.lastSyncTimestamp.set(new Date());
+      this.showToast(`¡Sincronizadas ${pending.length} guardias con tu Google Drive!`, 'success');
+    } catch (err: unknown) {
+      console.error('Batch sync error with Google Drive:', err);
+      const errMsg = err instanceof Error ? err.message : 'Error al conectar con Google Drive';
+      this.syncError.set(errMsg);
+      this.showToast('Error al sincronizar con Google Drive. Reintentará más tarde.', 'error');
     } finally {
       this.isSyncing.set(false);
     }
   }
 
   /**
-   * Fetch all remote shifts from Google Sheets via doGet(e)
+   * Fetch all remote shifts from user's Google Sheet
    */
   async fetchRemoteShifts(): Promise<void> {
-    const url = this.config().gasEndpointUrl.trim();
-    if (!url) {
-      this.showToast('Configura la URL de Apps Script antes de sincronizar.', 'error');
+    if (!this.googleAuthService.isConnected()) {
+      this.showToast('Conecta tu Google Drive en Ajustes para descargar tus guardias.', 'info');
+      return;
+    }
+
+    if (!this.isOnline()) {
+      this.showToast('Sin conexión a internet.', 'error');
       return;
     }
 
@@ -371,60 +335,32 @@ export class ShiftService {
       this.isSyncing.set(true);
       this.syncError.set(null);
 
-      const apiKey = this.config().gasApiKey?.trim();
-      const queryParams = ['t=' + Date.now()];
-      if (apiKey) {
-        queryParams.push('apiKey=' + encodeURIComponent(apiKey));
-      }
-      const fetchUrl = url + (url.includes('?') ? '&' : '?') + queryParams.join('&');
-      const response = await fetch(fetchUrl, {
-        method: 'GET',
-        redirect: 'follow',
-      });
+      const token = await this.googleAuthService.getValidToken();
+      const spreadsheetId = await this.googleDriveSyncService.findOrCreateSpreadsheet(token);
+      const remoteShifts = await this.googleDriveSyncService.fetchRemoteShifts(token, spreadsheetId);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result && result.status === 'success' && Array.isArray(result.data)) {
-        const remoteShifts: Shift[] = result.data.map((item: any) => ({
-          id: item.id || 'remote_' + item.date + '_' + Math.random().toString(36).substring(2, 6),
-          date: item.date,
-          colleague: item.colleague,
-          role: item.role as DutyRole,
-          notes: item.notes || '',
-          syncStatus: 'synced' as SyncStatus,
-          createdAt: item.createdAt || new Date().toISOString(),
-          remoteSyncedAt: new Date().toISOString(),
-        }));
-
-        // Merge remote shifts with local shifts (preserving local pending changes)
-        const localMap = new Map(this.shifts().map((s) => [s.id, s]));
-        for (const rem of remoteShifts) {
-          if (!localMap.has(rem.id)) {
+      // Merge remote shifts with local shifts (preserving local pending changes)
+      const localMap = new Map(this.shifts().map((s) => [s.id, s]));
+      for (const rem of remoteShifts) {
+        if (!localMap.has(rem.id)) {
+          localMap.set(rem.id, rem);
+        } else {
+          const existing = localMap.get(rem.id)!;
+          // Only overwrite if existing was not pending
+          if (existing.syncStatus !== 'pending') {
             localMap.set(rem.id, rem);
-          } else {
-            const existing = localMap.get(rem.id)!;
-            // Only overwrite if existing was not pending
-            if (existing.syncStatus !== 'pending') {
-              localMap.set(rem.id, rem);
-            }
           }
         }
-
-        this.shifts.set(Array.from(localMap.values()));
-        this.lastSyncTimestamp.set(new Date());
-        this.showToast(`Sincronización completa: ${remoteShifts.length} guardias cargadas`, 'success');
-      } else if (result?.errorType === 'unauthorized' || result?.status === 'unauthorized') {
-        throw new Error('Clave de seguridad inválida en Google Apps Script.');
-      } else {
-        throw new Error(result?.message || 'Formato de datos no reconocido');
       }
-    } catch (err: any) {
+
+      this.shifts.set(Array.from(localMap.values()));
+      this.lastSyncTimestamp.set(new Date());
+      this.showToast(`Sincronización completa: ${remoteShifts.length} guardias cargadas de Drive`, 'success');
+    } catch (err: unknown) {
       console.error('Fetch remote shifts error:', err);
-      this.syncError.set(err?.message || 'Error al obtener guardias de Google Sheets');
-      this.showToast('Error al conectar con Google Sheets.', 'error');
+      const errMsg = err instanceof Error ? err.message : 'Error al obtener guardias de Google Drive';
+      this.syncError.set(errMsg);
+      this.showToast('Error al conectar con Google Drive.', 'error');
     } finally {
       this.isSyncing.set(false);
     }
