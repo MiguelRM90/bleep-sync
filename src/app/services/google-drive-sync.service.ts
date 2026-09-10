@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Shift, DutyRole } from '../models/shift.model';
+import { normalizeDateToIso } from '../pipes/date-format.pipe';
 import { SPREADSHEET_TITLE, SHEET_NAME, SHEET_HEADERS } from '../constants/google-auth.constant';
 import {
   GoogleDriveFileListResponse,
@@ -155,7 +156,7 @@ export class GoogleDriveSyncService {
       .filter((row): row is (string | number | boolean | null)[] => Boolean(row && row[0] && row[1]))
       .map((row) => ({
         id: String(row[0]),
-        date: String(row[1]),
+        date: normalizeDateToIso(row[1]),
         colleague: String(row[2] || ''),
         role: (String(row[3]) as DutyRole) || 'Planta',
         notes: row[4] ? String(row[4]) : undefined,
@@ -205,7 +206,7 @@ export class GoogleDriveSyncService {
     const nowIso = new Date().toISOString();
     const rows = mergedList.map((s) => [
       s.id,
-      s.date,
+      normalizeDateToIso(s.date),
       s.colleague,
       s.role,
       s.notes || '',
