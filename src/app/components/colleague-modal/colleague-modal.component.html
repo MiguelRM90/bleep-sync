@@ -1,0 +1,222 @@
+<!-- Backdrop overlay -->
+<div
+  class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+  (click)="closeOnBackdrop($event)"
+>
+  <div
+    class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80 backdrop-blur-md shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-sm shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-100">Equipo & Historial Previo</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Añade a tus adjuntos con su último busca para arrancar</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="close.emit()"
+        class="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
+        aria-label="Cerrar modal"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body (Scrollable) -->
+    <div class="p-5 sm:p-7 overflow-y-auto flex flex-col gap-6 text-sm flex-1">
+
+      <!-- Form Section: Añadir nuevo adjunto con último busca -->
+      <div class="p-5 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/90 shadow-md flex flex-col gap-4">
+        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+          <span class="text-emerald-400 font-bold text-sm">➕</span>
+          <h4 class="text-sm font-bold text-slate-100">Registrar Adjunto & Última Guardia</h4>
+        </div>
+
+        <!-- Colleague Name Input -->
+        <div class="flex flex-col gap-1.5">
+          <label for="newColleagueInput" class="text-xs font-semibold text-slate-300">
+            Nombre del Adjunto / Compañero/a <span class="text-emerald-400">*</span>
+          </label>
+          <input
+            id="newColleagueInput"
+            type="text"
+            [(ngModel)]="newColleagueName"
+            placeholder="Ej: Dr. Alejandro Ruiz / Dra. Carmen Martínez"
+            class="input-clinical"
+            (keydown.enter)="saveColleague()"
+          />
+        </div>
+
+        <!-- Date of Last Shift -->
+        <div class="flex flex-col gap-1.5">
+          <label for="shiftDateInput" class="text-xs font-semibold text-slate-300">
+            Fecha de la última guardia juntos
+          </label>
+          <input
+            id="shiftDateInput"
+            type="date"
+            [(ngModel)]="shiftDate"
+            class="input-clinical font-medium"
+          />
+        </div>
+
+        <!-- Role / Busca Touch Selector -->
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-semibold text-slate-300">
+            ¿Qué busca llevaste tú en esa última guardia? <span class="text-emerald-400">*</span>
+          </label>
+          <div class="grid grid-cols-3 gap-2.5">
+            @for (opt of availableRoles; track opt.role) {
+              <button
+                type="button"
+                (click)="setRole(opt.role)"
+                class="p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-1 tactile-btn cursor-pointer select-none"
+                [ngClass]="{
+                  'bg-sky-500/20 text-sky-200 border-sky-500/60 shadow-md shadow-sky-950/40 ring-2 ring-sky-500/30': selectedRole() === opt.role && opt.role === 'Planta',
+                  'bg-emerald-500/20 text-emerald-200 border-emerald-500/60 shadow-md shadow-emerald-950/40 ring-2 ring-emerald-500/30': selectedRole() === opt.role && opt.role === 'Urgencias',
+                  'bg-amber-500/20 text-amber-200 border-amber-500/60 shadow-md shadow-amber-950/40 ring-2 ring-amber-500/30': selectedRole() === opt.role && opt.role === 'Ambos',
+                  'bg-slate-800/80 text-slate-300 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600': selectedRole() !== opt.role
+                }"
+              >
+                <span class="text-xl">{{ opt.icon }}</span>
+                <span class="text-xs font-bold leading-none">{{ opt.label }}</span>
+              </button>
+            }
+          </div>
+
+          <!-- Explanatory note based on selection -->
+          <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2">
+            <span class="text-emerald-400 text-xs">💡</span>
+            <span>
+              @if (selectedRole() === 'Planta') {
+                En la siguiente guardia con este adjunto, el sistema te recomendará <strong>Urgencias</strong>.
+              } @else if (selectedRole() === 'Urgencias') {
+                En la siguiente guardia con este adjunto, el sistema te recomendará <strong>Planta</strong>.
+              } @else {
+                Guardia conjunta: en la siguiente podrás elegir manualmente.
+              }
+            </span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="button"
+          (click)="saveColleague()"
+          [disabled]="!newColleagueName.trim() || isSaving()"
+          class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white transition active:scale-[0.98] shadow-md shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed mt-1"
+        >
+          @if (isSaving()) {
+            <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <span>Guardando...</span>
+          } @else {
+            <span>+ Registrar Adjunto en Historial</span>
+          }
+        </button>
+      </div>
+
+      <!-- Configured Colleagues List -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-300">
+            Equipo Quirúrgico Configurado ({{ shiftService.colleagues().length }})
+          </span>
+          <span class="text-[11px] text-slate-400">Última guardia registrada</span>
+        </div>
+
+        @if (shiftService.metrics().length === 0) {
+          <div class="py-8 px-4 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/30 text-slate-400 flex flex-col items-center gap-2">
+            <span class="text-2xl">📋</span>
+            <p class="text-xs text-slate-300 font-medium">Aún no has registrado ningún adjunto.</p>
+            <p class="text-[11px] text-slate-500 max-w-sm">
+              Rellena el formulario de arriba con el nombre de tu compañero y el busca de vuestra última guardia para empezar con datos reales.
+            </p>
+          </div>
+        } @else {
+          <div class="flex flex-col gap-2.5 max-h-[260px] overflow-y-auto pr-1">
+            @for (metric of shiftService.metrics(); track metric.colleague) {
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700/80 transition flex items-center justify-between gap-3">
+                <div class="flex flex-col gap-1 min-w-0 flex-1">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs sm:text-sm font-bold text-slate-100 truncate">
+                      {{ metric.colleague }}
+                    </span>
+
+                    <!-- Last Role Badge -->
+                    @if (metric.lastRole === 'Urgencias') {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        🚨 Urgencias
+                      </span>
+                    } @else if (metric.lastRole === 'Planta') {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                        🏥 Planta
+                      </span>
+                    } @else {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                        🔄 Ambos
+                      </span>
+                    }
+                  </div>
+
+                  <div class="flex items-center gap-2 text-[11px] text-slate-400">
+                    <span>{{ shiftService.formatDisplayDate(metric.lastShiftDate || '') }}</span>
+                    <span>•</span>
+                    <span class="text-emerald-400 font-medium">
+                      Hoy toca: <strong>{{ getNextRecommendedRole(metric.lastRole) }}</strong>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    (click)="selectColleagueAndClose(metric.colleague)"
+                    class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 transition active:scale-95 cursor-pointer"
+                    title="Seleccionar para la guardia de hoy"
+                  >
+                    Usar hoy
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="confirmDeleteColleague(metric.colleague)"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 transition active:scale-95 cursor-pointer"
+                    title="Eliminar adjunto e historial"
+                    aria-label="Eliminar adjunto e historial"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-950/80 backdrop-blur-md shrink-0">
+      <button
+        type="button"
+        (click)="close.emit()"
+        class="btn-primary"
+      >
+        Listo
+      </button>
+    </div>
+  </div>
+</div>

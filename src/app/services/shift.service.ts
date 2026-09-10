@@ -246,6 +246,32 @@ export class ShiftService {
   }
 
   /**
+   * Register a colleague with their baseline previous shift (busca & date)
+   */
+  async registerColleagueBaseline(colleagueName: string, role: DutyRole, date: string, notes?: string): Promise<Shift> {
+    const trimmed = colleagueName.trim();
+    const formattedDate = date || new Date().toISOString().split('T')[0];
+    const shift = await this.addShift({
+      colleague: trimmed,
+      role,
+      date: formattedDate,
+      notes: notes || 'Historial previo inicial',
+    });
+    this.showToast(`Historial guardado: ${trimmed} (${role})`, 'success');
+    return shift;
+  }
+
+  /**
+   * Remove a colleague and all their associated shift history
+   */
+  removeColleagueHistory(colleagueName: string): void {
+    const trimmed = colleagueName.trim().toLowerCase();
+    this.shifts.update((current) => current.filter((s) => s.colleague.trim().toLowerCase() !== trimmed));
+    this.showToast(`Historial de ${colleagueName} eliminado.`, 'info');
+    this.triggerHaptic();
+  }
+
+  /**
    * Sync a single shift to Google Drive / Sheets API
    */
   private async syncSingleShift(shift: Shift): Promise<void> {
@@ -516,11 +542,15 @@ export class ShiftService {
   }
 
   /**
-   * Reset all data to empty or demo
+   * Reset all shift data to a clean slate
    */
   resetData(): void {
-    this.seedInitialDemoData();
-    this.showToast('Datos de demostración restablecidos.', 'info');
+    this.shifts.set([]);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem(STORAGE_KEY_SHIFTS);
+    }
+    this.showToast('Historial de guardias vaciado correctamente.', 'info');
+    this.triggerHaptic();
   }
 
   /**

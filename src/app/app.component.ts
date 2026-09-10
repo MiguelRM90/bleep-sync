@@ -5,6 +5,7 @@ import { DutyCheckerComponent } from './components/duty-checker/duty-checker.com
 import { DutyLoggerComponent } from './components/duty-logger/duty-logger.component';
 import { MetricsSummaryComponent } from './components/metrics-summary/metrics-summary.component';
 import { ConfigModalComponent } from './components/config-modal/config-modal.component';
+import { ColleagueModalComponent } from './components/colleague-modal/colleague-modal.component';
 import { ShiftService } from './services/shift.service';
 import { DutyRole } from './models/shift.model';
 import { BeforeInstallPromptEvent } from './models/pwa.model';
@@ -19,15 +20,18 @@ import { BeforeInstallPromptEvent } from './models/pwa.model';
     DutyLoggerComponent,
     MetricsSummaryComponent,
     ConfigModalComponent,
+    ColleagueModalComponent,
   ],
   templateUrl: './app.component.html',
 })
 export class AppComponent {
   readonly shiftService = inject(ShiftService);
   readonly isConfigOpen = signal<boolean>(false);
+  readonly isColleagueModalOpen = signal<boolean>(false);
   readonly deferredPrompt = signal<BeforeInstallPromptEvent | null>(null);
 
-  // ViewChild reference to DutyLoggerComponent
+  // ViewChild references
+  private readonly dutyChecker = viewChild(DutyCheckerComponent);
   private readonly dutyLogger = viewChild(DutyLoggerComponent);
 
   constructor() {
@@ -41,6 +45,11 @@ export class AppComponent {
   }
 
   onColleagueChanged(name: string): void {
+    this.dutyLogger()?.setColleagueFromChecker(name);
+  }
+
+  onColleagueAddedOrSelected(name: string): void {
+    this.dutyChecker()?.selectColleagueDirectly(name);
     this.dutyLogger()?.setColleagueFromChecker(name);
   }
 

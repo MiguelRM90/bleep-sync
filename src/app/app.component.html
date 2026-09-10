@@ -26,13 +26,16 @@
     <app-duty-checker
       (colleagueChange)="onColleagueChanged($event)"
       (recommendationApplied)="onRecommendationApplied($event)"
+      (openColleagueManager)="isColleagueModalOpen.set(true)"
     ></app-duty-checker>
 
     <!-- Duty Logger: Large Touch Targets & Tactile Submission -->
     <app-duty-logger></app-duty-logger>
 
     <!-- Metrics & Shift History Timeline -->
-    <app-metrics-summary></app-metrics-summary>
+    <app-metrics-summary
+      (openColleagueManager)="isColleagueModalOpen.set(true)"
+    ></app-metrics-summary>
   </main>
 
   <!-- Footer Info -->
@@ -48,7 +51,18 @@
 
   <!-- Configuration Modal -->
   @if (isConfigOpen()) {
-    <app-config-modal (close)="isConfigOpen.set(false)"></app-config-modal>
+    <app-config-modal
+      (close)="isConfigOpen.set(false)"
+      (openColleagueManager)="isColleagueModalOpen.set(true)"
+    ></app-config-modal>
+  }
+
+  <!-- Colleague & Previous History Modal -->
+  @if (isColleagueModalOpen()) {
+    <app-colleague-modal
+      (close)="isColleagueModalOpen.set(false)"
+      (colleagueSelected)="onColleagueAddedOrSelected($event)"
+    ></app-colleague-modal>
   }
 
   <!-- Toast Feedback Floating Notification -->

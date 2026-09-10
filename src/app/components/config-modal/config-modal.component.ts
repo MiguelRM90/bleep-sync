@@ -16,6 +16,7 @@ export class ConfigModalComponent {
   readonly googleAuth = inject(GoogleAuthService);
   readonly googleDriveSync = inject(GoogleDriveSyncService);
   readonly close = output<void>();
+  readonly openColleagueManager = output<void>();
 
   showPrivacyDetails = signal<boolean>(false);
 
@@ -84,16 +85,9 @@ export class ConfigModalComponent {
     this.shiftService.fetchRemoteShifts();
   }
 
-  restoreDemoData(): void {
-    if (confirm('¿Cargar conjunto de guardias de demostración?')) {
-      this.shiftService.resetData();
-    }
-  }
-
   clearAllData(): void {
-    if (confirm('¿Estás seguro de que deseas eliminar todas las guardias locales? Esta acción no se puede deshacer.')) {
-      this.shiftService.shifts.set([]);
-      this.shiftService.showToast('Base de datos local vaciada.', 'info');
+    if (confirm('¿Estás seguro de que deseas vaciar todas las guardias locales? Esta acción no se puede deshacer.')) {
+      this.shiftService.resetData();
     }
   }
 }

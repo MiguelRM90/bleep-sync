@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ShiftService } from '../../services/shift.service';
 
@@ -11,6 +11,7 @@ import { ShiftService } from '../../services/shift.service';
 export class MetricsSummaryComponent {
   readonly shiftService = inject(ShiftService);
   readonly activeTab = signal<'timeline' | 'balance'>('timeline');
+  readonly openColleagueManager = output<void>();
 
   deleteShift(id: string): void {
     if (confirm('¿Seguro que deseas eliminar este registro de guardia?')) {

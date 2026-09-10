@@ -49,10 +49,12 @@
           <p class="text-sm font-medium text-slate-300">No hay guardias registradas todavía.</p>
           <p class="text-xs text-slate-500 mt-1">Registra tu primera guardia en el paso 2 de arriba para ver el histórico.</p>
           <button
-            (click)="shiftService.seedInitialDemoData()"
-            class="mt-5 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-400 rounded-xl border border-slate-700 transition tactile-btn cursor-pointer"
+            type="button"
+            (click)="openColleagueManager.emit()"
+            class="mt-5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white rounded-xl shadow-md transition tactile-btn cursor-pointer inline-flex items-center gap-2"
           >
-            Cargar datos de prueba
+            <span>👥</span>
+            <span>Registrar Adjuntos e Historial Previo</span>
           </button>
         </div>
       } @else {
@@ -141,7 +143,17 @@
   @if (activeTab() === 'balance') {
     <div class="flex flex-col gap-4">
       @if (shiftService.metrics().length === 0) {
-        <p class="text-sm text-slate-500 text-center py-10">No hay suficientes datos para computar el balance.</p>
+        <div class="text-center py-10 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-950/30 flex flex-col items-center gap-2">
+          <p class="text-sm font-medium text-slate-400">Aún no hay datos de adjuntos para computar el balance.</p>
+          <button
+            type="button"
+            (click)="openColleagueManager.emit()"
+            class="mt-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-bold rounded-xl border border-slate-700 transition tactile-btn cursor-pointer inline-flex items-center gap-2"
+          >
+            <span>👥</span>
+            <span>Añadir Adjuntos</span>
+          </button>
+        </div>
       } @else {
         <div class="flex flex-col gap-4 max-h-[480px] overflow-y-auto pr-2">
           @for (item of shiftService.metrics(); track item.colleague) {

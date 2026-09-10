@@ -15,6 +15,7 @@ export class DutyCheckerComponent {
 
   readonly colleagueChange = output<string>();
   readonly recommendationApplied = output<{ colleague: string; role: DutyRole }>();
+  readonly openColleagueManager = output<void>();
 
   readonly selectedColleague = signal<string>('');
   readonly showAddColleagueInput = signal<boolean>(false);
@@ -36,6 +37,12 @@ export class DutyCheckerComponent {
   }
 
   onColleagueSelect(colleague: string): void {
+    this.selectedColleague.set(colleague);
+    this.colleagueChange.emit(colleague);
+    this.shiftService.triggerHaptic();
+  }
+
+  selectColleagueDirectly(colleague: string): void {
     this.selectedColleague.set(colleague);
     this.colleagueChange.emit(colleague);
     this.shiftService.triggerHaptic();
