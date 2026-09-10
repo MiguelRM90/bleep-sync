@@ -29,33 +29,12 @@ export class ConfigModalComponent {
   }
 
   async connectGoogle(): Promise<void> {
-    try {
-      this.shiftService.triggerHaptic();
-      const token = await this.googleAuth.login();
-      this.shiftService.showToast('¡Conectado a Google con éxito!', 'success');
-
-      // Ensure spreadsheet is linked and sync
-      const sheetId = await this.googleDriveSync.findOrCreateSpreadsheet(token);
-      this.shiftService.updateConfig({ googleConnected: true, googleSpreadsheetId: sheetId });
-
-      // Automatically sync shifts
-      await this.shiftService.fetchRemoteShifts();
-      if (this.shiftService.pendingSyncCount() > 0) {
-        await this.shiftService.syncPendingShifts();
-      }
-    } catch (err: unknown) {
-      console.error('Google connection error:', err);
-      const msg = err instanceof Error ? err.message : 'No se pudo completar la conexión con Google.';
-      this.shiftService.showToast(msg, 'error');
-    }
+    await this.shiftService.connectGoogle();
   }
 
   disconnectGoogle(): void {
     if (confirm('¿Deseas desconectar tu cuenta de Google Drive? Tus guardias guardadas en el móvil no se borrarán.')) {
-      this.shiftService.triggerHaptic();
-      this.googleAuth.logout();
-      this.shiftService.updateConfig({ googleConnected: false, googleSpreadsheetId: undefined });
-      this.shiftService.showToast('Cuenta de Google desconectada.', 'info');
+      this.shiftService.disconnectGoogle();
     }
   }
 

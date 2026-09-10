@@ -65,6 +65,42 @@
         <span class="hidden sm:inline">{{ shiftService.isOnline() ? 'Online' : 'Offline' }}</span>
       </div>
 
+      <!-- Google Drive Status / Connect Button -->
+      <button
+        (click)="onGoogleDriveClick()"
+        [disabled]="shiftService.googleAuthService.isAuthenticating()"
+        type="button"
+        class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition tactile-btn border cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        [ngClass]="{
+          'bg-emerald-950/40 text-emerald-300 border-emerald-700/40 hover:bg-emerald-900/40': shiftService.googleAuthService.isConnected(),
+          'bg-amber-500/15 text-amber-300 border-amber-500/35 hover:bg-amber-500/25 active:scale-95 shadow-sm shadow-amber-950/30': !shiftService.googleAuthService.isConnected()
+        }"
+        [title]="shiftService.googleAuthService.isConnected() ? 'Google Drive conectado (' + (shiftService.googleAuthService.userProfile()?.email || 'Activo') + '). Clic para abrir ajustes.' : 'Google Drive no conectado. Haz clic para iniciar sesión y sincronizar tus guardias.'"
+      >
+        @if (shiftService.googleAuthService.isAuthenticating()) {
+          <span class="inline-block w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></span>
+          <span class="hidden sm:inline">Conectando...</span>
+        } @else if (shiftService.googleAuthService.isConnected()) {
+          <!-- Cloud check connected icon -->
+          <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path>
+            <polyline points="9 13 12 16 20 8"></polyline>
+          </svg>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span class="hidden sm:inline">Drive</span>
+        } @else {
+          <!-- Google 'G' Icon -->
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.58-5.17 3.58-9.12z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.33 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+          </svg>
+          <span class="hidden sm:inline">Conectar Drive</span>
+          <span class="sm:hidden">Conectar</span>
+        }
+      </button>
+
       <!-- Settings Cog button -->
       <button
         (click)="openConfig.emit()"

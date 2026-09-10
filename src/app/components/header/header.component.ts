@@ -11,4 +11,12 @@ import { ShiftService } from '../../services/shift.service';
 export class HeaderComponent {
   readonly shiftService = inject(ShiftService);
   readonly openConfig = output<void>();
+
+  async onGoogleDriveClick(): Promise<void> {
+    if (this.shiftService.googleAuthService.isConnected()) {
+      this.openConfig.emit();
+    } else {
+      await this.shiftService.connectGoogle();
+    }
+  }
 }

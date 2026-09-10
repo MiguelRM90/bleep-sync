@@ -344,6 +344,43 @@ export class ShiftService {
   }
 
   /**
+   * Connect to Google Drive, link spreadsheet, and sync initial shifts
+   */
+  async connectGoogle(): Promise<boolean> {
+    try {
+      this.triggerHaptic();
+      const token = await this.googleAuthService.login();
+      this.showToast('¡Conectado a Google con éxito!', 'success');
+
+      // Ensure spreadsheet is linked and sync
+      const sheetId = await this.googleDriveSyncService.findOrCreateSpreadsheet(token);
+      this.updateConfig({ googleConnected: true, googleSpreadsheetId: sheetId });
+
+      // Automatically sync shifts
+      await this.fetchRemoteShifts();
+      if (this.pendingSyncCount() > 0) {
+        await this.syncPendingShifts();
+      }
+      return true;
+    } catch (err: unknown) {
+      console.error('Google connection error:', err);
+      const msg = err instanceof Error ? err.message : 'No se pudo completar la conexión con Google.';
+      this.showToast(msg, 'error');
+      return false;
+    }
+  }
+
+  /**
+   * Disconnect Google account and clear remote sheet reference
+   */
+  disconnectGoogle(): void {
+    this.triggerHaptic();
+    this.googleAuthService.logout();
+    this.updateConfig({ googleConnected: false, googleSpreadsheetId: undefined });
+    this.showToast('Cuenta de Google desconectada.', 'info');
+  }
+
+  /**
    * Fetch all remote shifts from user's Google Sheet
    */
   async fetchRemoteShifts(): Promise<void> {
