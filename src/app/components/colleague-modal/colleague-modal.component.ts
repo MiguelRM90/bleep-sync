@@ -1,28 +1,42 @@
-import { Component, inject, signal, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShiftService } from '../../services/shift.service';
-import { DutyRole, ColleagueMetrics } from '../../models/shift.model';
+import { HapticService } from '../../services/haptic.service';
+import { DutySessionStoreService } from '../../services/duty-session-store.service';
+import { DutyRole } from '../../models/shift.model';
+import { ModalComponent } from '../ui/modal/modal.component';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
+
+interface RoleOption {
+  role: DutyRole;
+  label: string;
+  icon: string;
+  desc: string;
+}
 
 @Component({
   selector: 'app-colleague-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalComponent, DateFormatPipe],
   templateUrl: './colleague-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ColleagueModalComponent {
   readonly shiftService = inject(ShiftService);
+  private readonly hapticService = inject(HapticService);
+  private readonly sessionStore = inject(DutySessionStoreService);
 
   readonly close = output<void>();
   readonly colleagueSelected = output<string>();
 
   newColleagueName = '';
-  selectedRole = signal<DutyRole>('Planta');
-  shiftDate = signal<string>(new Date().toISOString().split('T')[0]);
+  readonly selectedRole = signal<DutyRole>('Planta');
+  readonly shiftDate = signal<string>(new Date().toISOString().split('T')[0]);
   notes = '';
-  isSaving = signal<boolean>(false);
+  readonly isSaving = signal<boolean>(false);
 
-  readonly availableRoles: { role: DutyRole; label: string; icon: string; desc: string }[] = [
+  readonly availableRoles: readonly RoleOption[] = [
     {
       role: 'Planta',
       label: 'Planta',
@@ -45,7 +59,7 @@ export class ColleagueModalComponent {
 
   setRole(role: DutyRole): void {
     this.selectedRole.set(role);
-    this.shiftService.triggerHaptic();
+    this.hapticService.trigger();
   }
 
   async saveColleague(): Promise<void> {
@@ -61,7 +75,8 @@ export class ColleagueModalComponent {
         this.notes.trim() || 'Historial previo inicial'
       );
 
-      // Notify parent to auto-select this colleague
+      // Update active session and notify
+      this.sessionStore.setActiveColleague(trimmed);
       this.colleagueSelected.emit(trimmed);
 
       // Reset form fields
@@ -73,8 +88,9 @@ export class ColleagueModalComponent {
   }
 
   selectColleagueAndClose(colleagueName: string): void {
+    this.sessionStore.setActiveColleague(colleagueName);
     this.colleagueSelected.emit(colleagueName);
-    this.shiftService.triggerHaptic();
+    this.hapticService.trigger();
     this.close.emit();
   }
 
@@ -88,11 +104,5 @@ export class ColleagueModalComponent {
     if (lastRole === 'Planta') return 'Urgencias';
     if (lastRole === 'Urgencias') return 'Planta';
     return 'Manual';
-  }
-
-  closeOnBackdrop(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.close.emit();
-    }
   }
 }

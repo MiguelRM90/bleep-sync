@@ -1,12 +1,14 @@
-import { Component, inject, signal, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ShiftService } from '../../services/shift.service';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 @Component({
   selector: 'app-metrics-summary',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DateFormatPipe],
   templateUrl: './metrics-summary.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MetricsSummaryComponent {
   readonly shiftService = inject(ShiftService);

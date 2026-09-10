@@ -1,4 +1,4 @@
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { DutyCheckerComponent } from './components/duty-checker/duty-checker.component';
@@ -7,6 +7,8 @@ import { MetricsSummaryComponent } from './components/metrics-summary/metrics-su
 import { ConfigModalComponent } from './components/config-modal/config-modal.component';
 import { ColleagueModalComponent } from './components/colleague-modal/colleague-modal.component';
 import { ShiftService } from './services/shift.service';
+import { DutySessionStoreService } from './services/duty-session-store.service';
+import { ToastNotificationService } from './services/toast-notification.service';
 import { DutyRole } from './models/shift.model';
 import { BeforeInstallPromptEvent } from './models/pwa.model';
 
@@ -23,16 +25,16 @@ import { BeforeInstallPromptEvent } from './models/pwa.model';
     ColleagueModalComponent,
   ],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   readonly shiftService = inject(ShiftService);
+  private readonly sessionStore = inject(DutySessionStoreService);
+  private readonly toastService = inject(ToastNotificationService);
+
   readonly isConfigOpen = signal<boolean>(false);
   readonly isColleagueModalOpen = signal<boolean>(false);
   readonly deferredPrompt = signal<BeforeInstallPromptEvent | null>(null);
-
-  // ViewChild references
-  private readonly dutyChecker = viewChild(DutyCheckerComponent);
-  private readonly dutyLogger = viewChild(DutyLoggerComponent);
 
   constructor() {
     // Capture beforeinstallprompt for mobile PWA installation UX
@@ -44,18 +46,13 @@ export class AppComponent {
     }
   }
 
-  onColleagueChanged(name: string): void {
-    this.dutyLogger()?.setColleagueFromChecker(name);
-  }
-
   onColleagueAddedOrSelected(name: string): void {
-    this.dutyChecker()?.selectColleagueDirectly(name);
-    this.dutyLogger()?.setColleagueFromChecker(name);
+    this.sessionStore.setActiveColleague(name);
   }
 
   onRecommendationApplied(data: { colleague: string; role: DutyRole }): void {
-    this.dutyLogger()?.setPreselection(data.colleague, data.role);
-    this.shiftService.showToast(`Recomendación aplicada: ${data.role}`, 'success');
+    this.sessionStore.applyRecommendation(data.colleague, data.role);
+    this.toastService.show(`Recomendación aplicada: ${data.role}`, 'success');
   }
 
   async installPwa(): Promise<void> {

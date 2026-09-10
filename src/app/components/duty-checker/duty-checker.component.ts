@@ -1,7 +1,17 @@
-import { Component, inject, signal, computed, output, effect } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  computed,
+  output,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShiftService } from '../../services/shift.service';
+import { HapticService } from '../../services/haptic.service';
+import { DutySessionStoreService } from '../../services/duty-session-store.service';
 import { DutyRole } from '../../models/shift.model';
 
 @Component({
@@ -9,43 +19,41 @@ import { DutyRole } from '../../models/shift.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './duty-checker.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DutyCheckerComponent {
   readonly shiftService = inject(ShiftService);
+  private readonly hapticService = inject(HapticService);
+  readonly sessionStore = inject(DutySessionStoreService);
 
   readonly colleagueChange = output<string>();
   readonly recommendationApplied = output<{ colleague: string; role: DutyRole }>();
   readonly openColleagueManager = output<void>();
 
-  readonly selectedColleague = signal<string>('');
   readonly showAddColleagueInput = signal<boolean>(false);
   newColleagueName = '';
+
+  readonly selectedColleague = this.sessionStore.activeColleague;
 
   readonly recommendation = computed(() => {
     return this.shiftService.getRecommendationForColleague(this.selectedColleague());
   });
 
   constructor() {
-    // Default to the first colleague in the roster if available
+    // Default to the first colleague in the roster if available and none selected yet
     effect(() => {
       const list = this.shiftService.colleagues();
       if (list.length > 0 && !this.selectedColleague()) {
-        this.selectedColleague.set(list[0]);
+        this.sessionStore.setActiveColleague(list[0]);
         this.colleagueChange.emit(list[0]);
       }
     });
   }
 
   onColleagueSelect(colleague: string): void {
-    this.selectedColleague.set(colleague);
+    this.sessionStore.setActiveColleague(colleague);
     this.colleagueChange.emit(colleague);
-    this.shiftService.triggerHaptic();
-  }
-
-  selectColleagueDirectly(colleague: string): void {
-    this.selectedColleague.set(colleague);
-    this.colleagueChange.emit(colleague);
-    this.shiftService.triggerHaptic();
+    this.hapticService.trigger();
   }
 
   toggleAddColleague(): void {
@@ -56,22 +64,21 @@ export class DutyCheckerComponent {
   addNewColleague(): void {
     const trimmed = this.newColleagueName.trim();
     if (trimmed) {
-      this.selectedColleague.set(trimmed);
+      this.sessionStore.setActiveColleague(trimmed);
       this.colleagueChange.emit(trimmed);
       this.showAddColleagueInput.set(false);
       this.newColleagueName = '';
-      this.shiftService.triggerHaptic();
+      this.hapticService.trigger();
     }
   }
 
   applyRecommendation(): void {
     const role = this.recommendation().recommendedRole;
-    if (role && this.selectedColleague()) {
-      this.shiftService.triggerHaptic();
-      this.recommendationApplied.emit({
-        colleague: this.selectedColleague(),
-        role,
-      });
+    const colleague = this.selectedColleague();
+    if (role && colleague) {
+      this.hapticService.trigger();
+      this.sessionStore.applyRecommendation(colleague, role);
+      this.recommendationApplied.emit({ colleague, role });
     }
   }
 }

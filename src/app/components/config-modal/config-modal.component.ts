@@ -1,32 +1,33 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShiftService } from '../../services/shift.service';
 import { GoogleAuthService } from '../../services/google-auth.service';
 import { GoogleDriveSyncService } from '../../services/google-drive-sync.service';
+import { ToastNotificationService } from '../../services/toast-notification.service';
+import { ModalComponent } from '../ui/modal/modal.component';
 
 @Component({
   selector: 'app-config-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalComponent],
   templateUrl: './config-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigModalComponent {
   readonly shiftService = inject(ShiftService);
   readonly googleAuth = inject(GoogleAuthService);
   readonly googleDriveSync = inject(GoogleDriveSyncService);
+  private readonly toastService = inject(ToastNotificationService);
+
   readonly close = output<void>();
   readonly openColleagueManager = output<void>();
 
-  showPrivacyDetails = signal<boolean>(false);
+  readonly showPrivacyDetails = signal<boolean>(false);
 
   surgeonName = this.shiftService.config().currentSurgeonName;
   hapticEnabled = this.shiftService.config().hapticFeedbackEnabled;
   autoSync = this.shiftService.config().autoSyncOnReconnect;
-
-  closeOnBackdrop(event: MouseEvent): void {
-    this.close.emit();
-  }
 
   async connectGoogle(): Promise<void> {
     await this.shiftService.connectGoogle();
@@ -43,7 +44,7 @@ export class ConfigModalComponent {
     if (url && typeof window !== 'undefined') {
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
-      this.shiftService.showToast('Aún no se ha creado la hoja en Drive. Pulsa Sincronizar.', 'info');
+      this.toastService.show('Aún no se ha creado la hoja en Drive. Pulsa Sincronizar.', 'info');
     }
   }
 

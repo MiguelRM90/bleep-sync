@@ -1,292 +1,256 @@
-<!-- Backdrop overlay -->
-<div
-  class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
-  (click)="closeOnBackdrop($event)"
+<app-modal
+  title="Ajustes & Nube"
+  subtitle="Google Drive & Preferencias del dispositivo"
+  (close)="close.emit()"
 >
-  <div
-    class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
-    (click)="$event.stopPropagation()"
-  >
-    <!-- Modal Header -->
-    <div class="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80 backdrop-blur-md shrink-0">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-sm shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-        </div>
+  <!-- Modal Icon Slot -->
+  <div modal-icon class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-sm shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  </div>
+
+  <!-- Google Drive Cloud Card -->
+  <section class="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/80 shadow-lg flex flex-col gap-5">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">☁️</span>
         <div>
-          <h3 class="text-base sm:text-lg font-bold text-slate-100">Ajustes & Nube</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Google Drive & Preferencias del dispositivo</p>
+          <h4 class="text-sm font-bold text-slate-100">Copia de Seguridad en Google Drive</h4>
+          <p class="text-xs text-slate-400">Tus guardias sincronizadas en una hoja de Google Sheets</p>
         </div>
       </div>
-
-      <button
-        type="button"
-        (click)="close.emit()"
-        class="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
+      @if (googleAuth.isConnected()) {
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Conectado
+        </span>
+      } @else {
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+          Sin conectar
+        </span>
+      }
     </div>
 
-    <!-- Modal Body (Scrollable) -->
-    <div class="p-5 sm:p-7 overflow-y-auto flex flex-col gap-6 text-sm flex-1">
+    <!-- NOT CONNECTED STATE -->
+    @if (!googleAuth.isConnected()) {
+      <div class="flex flex-col gap-4">
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Conecta tu cuenta de Google con <strong>un solo clic</strong> desde tu móvil o PC. BleepSync creará automáticamente la hoja <strong>«Guardias BleepSync»</strong> en tu Google Drive y mantendrá tus turnos siempre sincronizados, incluso si estás en quirófano sin cobertura.
+        </p>
 
-      <!-- Google Drive Cloud Card -->
-      <div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/80 shadow-lg flex flex-col gap-5">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div class="flex items-center gap-2.5">
-            <span class="text-xl">☁️</span>
-            <div>
-              <h4 class="text-sm font-bold text-slate-100">Copia de Seguridad en Google Drive</h4>
-              <p class="text-xs text-slate-400">Tus guardias sincronizadas en una hoja de Google Sheets</p>
-            </div>
-          </div>
-          @if (googleAuth.isConnected()) {
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Conectado
-            </span>
+        <button
+          type="button"
+          (click)="connectGoogle()"
+          [disabled]="googleAuth.isAuthenticating()"
+          class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-white hover:bg-slate-100 text-slate-900 transition active:scale-[0.98] shadow-md flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (googleAuth.isAuthenticating()) {
+            <span class="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></span>
+            <span>Conectando con Google...</span>
           } @else {
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-              Sin conectar
-            </span>
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.58-5.17 3.58-9.12z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+            </svg>
+            <span>Conectar con Google Drive</span>
           }
+        </button>
+
+        <div class="p-3.5 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
+          <span class="text-emerald-400 text-sm mt-0.5">🔒</span>
+          <p class="leading-relaxed">
+            <strong>100% privado y seguro:</strong> BleepSync solo puede acceder a la hoja de cálculo que crea para tus guardias. No tiene acceso a tus correos, fotos ni a ningún otro archivo de tu Google Drive.
+          </p>
         </div>
+      </div>
+    }
 
-        <!-- NOT CONNECTED STATE -->
-        @if (!googleAuth.isConnected()) {
-          <div class="flex flex-col gap-4">
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Conecta tu cuenta de Google con <strong>un solo clic</strong> desde tu móvil o PC. BleepSync creará automáticamente la hoja <strong>«Guardias BleepSync»</strong> en tu Google Drive y mantendrá tus turnos siempre sincronizados, incluso si estás en quirófano sin cobertura.
-            </p>
-
-            <button
-              type="button"
-              (click)="connectGoogle()"
-              [disabled]="googleAuth.isAuthenticating()"
-              class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-white hover:bg-slate-100 text-slate-900 transition active:scale-[0.98] shadow-md flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              @if (googleAuth.isAuthenticating()) {
-                <span class="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></span>
-                <span>Conectando con Google...</span>
-              } @else {
-                <!-- Official Google "G" Icon -->
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.58-5.17 3.58-9.12z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.33 24 12 24z"/>
-                  <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
-                </svg>
-                <span>Conectar con Google Drive</span>
-              }
-            </button>
-
-            <!-- Security & Privacy Guarantee Note -->
-            <div class="p-3.5 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
-              <span class="text-emerald-400 text-sm mt-0.5">🔒</span>
-              <p class="leading-relaxed">
-                <strong>100% privado y seguro:</strong> BleepSync solo puede acceder a la hoja de cálculo que crea para tus guardias. No tiene acceso a tus correos, fotos ni a ningún otro archivo de tu Google Drive.
+    <!-- CONNECTED STATE -->
+    @if (googleAuth.isConnected()) {
+      <div class="flex flex-col gap-5">
+        <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            @if (googleAuth.userProfile()?.picture) {
+              <img
+                [src]="googleAuth.userProfile()!.picture"
+                alt="Avatar"
+                class="w-10 h-10 rounded-full border border-emerald-500/40 object-cover shrink-0"
+              />
+            } @else {
+              <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center border border-emerald-500/30 shrink-0">
+                {{ (googleAuth.userProfile()?.name || 'D').charAt(0).toUpperCase() }}
+              </div>
+            }
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-slate-100 truncate">
+                {{ googleAuth.userProfile()?.name || 'Doctor/a' }}
+              </p>
+              <p class="text-xs text-slate-400 truncate">
+                {{ googleAuth.userProfile()?.email || 'Cuenta de Google activa' }}
               </p>
             </div>
           </div>
-        }
 
-        <!-- CONNECTED STATE -->
-        @if (googleAuth.isConnected()) {
-          <div class="flex flex-col gap-5">
-            <!-- User Profile Card -->
-            <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                @if (googleAuth.userProfile()?.picture) {
-                  <img
-                    [src]="googleAuth.userProfile()!.picture"
-                    alt="Avatar"
-                    class="w-10 h-10 rounded-full border border-emerald-500/40 object-cover shrink-0"
-                  />
-                } @else {
-                  <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center border border-emerald-500/30 shrink-0">
-                    {{ (googleAuth.userProfile()?.name || 'D').charAt(0).toUpperCase() }}
-                  </div>
-                }
-                <div class="min-w-0">
-                  <p class="text-sm font-bold text-slate-100 truncate">
-                    {{ googleAuth.userProfile()?.name || 'Doctor/a' }}
-                  </p>
-                  <p class="text-xs text-slate-400 truncate">
-                    {{ googleAuth.userProfile()?.email || 'Cuenta de Google activa' }}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                (click)="disconnectGoogle()"
-                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 border border-rose-500/30 transition cursor-pointer shrink-0"
-              >
-                Desconectar
-              </button>
-            </div>
-
-            <!-- Spreadsheet Info & Direct Link -->
-            <div class="flex items-center justify-between p-3.5 bg-emerald-950/20 border border-emerald-500/20 rounded-xl">
-              <div class="flex items-center gap-2.5">
-                <span class="text-lg">📊</span>
-                <div>
-                  <p class="text-xs font-bold text-slate-200">Hoja: Guardias BleepSync</p>
-                  <p class="text-[11px] text-emerald-400/90">Sincronización en la nube lista</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                (click)="openSheetInDrive()"
-                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
-              >
-                <span>Abrir en Drive</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Sync Buttons Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                (click)="syncPending()"
-                [disabled]="shiftService.isSyncing()"
-                class="btn-emerald-soft py-2.5 text-xs font-bold flex items-center justify-center gap-2"
-              >
-                @if (shiftService.isSyncing()) {
-                  <span class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
-                  <span>Sincronizando...</span>
-                } @else {
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                  </svg>
-                  <span>Subir pendientes ({{ shiftService.pendingSyncCount() }})</span>
-                }
-              </button>
-
-              <button
-                type="button"
-                (click)="fetchRemote()"
-                [disabled]="shiftService.isSyncing()"
-                class="btn-sky-soft py-2.5 text-xs font-bold flex items-center justify-center gap-2"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                <span>Descargar de Google Drive</span>
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-
-      <!-- User Profile & Preferences Card -->
-      <div class="card-subtle flex flex-col gap-5">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
-          Preferencias de Usuario
-        </span>
-
-        <!-- Surgeon Profile Name -->
-        <div class="flex flex-col gap-2">
-          <label for="surgeonNameInput" class="font-semibold text-slate-200 text-xs uppercase tracking-wider">
-            Nombre de la Doctora / Cirujana
-          </label>
-          <input
-            type="text"
-            id="surgeonNameInput"
-            [(ngModel)]="surgeonName"
-            placeholder="Ej: Dra. Elena Ramos"
-            class="input-clinical"
-          />
-          <p class="text-xs text-slate-400">
-            Identificador en la pantalla principal.
-          </p>
-        </div>
-
-        <!-- Auto Sync Toggle -->
-        <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-800/40 transition">
-          <div class="flex flex-col gap-0.5">
-            <span class="font-semibold text-slate-200 text-xs">Sincronización automática al recuperar cobertura</span>
-            <span class="text-[11px] text-slate-400">
-              Sincroniza en segundo plano al salir de quirófanos o plantas sin señal.
-            </span>
-          </div>
-          <input
-            type="checkbox"
-            [(ngModel)]="autoSync"
-            class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-slate-900 cursor-pointer"
-          />
-        </label>
-
-        <!-- Haptic Feedback Toggle -->
-        <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-800/40 transition">
-          <div class="flex flex-col gap-0.5">
-            <span class="font-semibold text-slate-200 text-xs">Vibración háptica</span>
-            <span class="text-[11px] text-slate-400">
-              Vibración táctil al registrar guardias y pulsar botones en el móvil.
-            </span>
-          </div>
-          <input
-            type="checkbox"
-            [(ngModel)]="hapticEnabled"
-            class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-slate-900 cursor-pointer"
-          />
-        </label>
-      </div>
-
-      <!-- Local Data Management Card -->
-      <div class="card-subtle flex flex-col gap-4">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
-          Mantenimiento de Datos Locales
-        </span>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <button
             type="button"
-            (click)="openColleagueManager.emit(); close.emit()"
-            class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 text-emerald-300 border border-slate-700/80 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            (click)="disconnectGoogle()"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 border border-rose-500/30 transition cursor-pointer shrink-0"
           >
-            <span>👥</span>
-            <span>Equipo & Historial Previo</span>
+            Desconectar
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between p-3.5 bg-emerald-950/20 border border-emerald-500/20 rounded-xl">
+          <div class="flex items-center gap-2.5">
+            <span class="text-lg">📊</span>
+            <div>
+              <p class="text-xs font-bold text-slate-200">Hoja: Guardias BleepSync</p>
+              <p class="text-[11px] text-emerald-400/90">Sincronización en la nube lista</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="openSheetInDrive()"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+          >
+            <span>Abrir en Drive</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            (click)="syncPending()"
+            [disabled]="shiftService.isSyncing()"
+            class="btn-emerald-soft py-2.5 text-xs font-bold flex items-center justify-center gap-2"
+          >
+            @if (shiftService.isSyncing()) {
+              <span class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+              <span>Sincronizando...</span>
+            } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+              </svg>
+              <span>Subir pendientes ({{ shiftService.pendingSyncCount() }})</span>
+            }
           </button>
 
           <button
             type="button"
-            (click)="clearAllData()"
-            class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-950/20 hover:bg-rose-950/40 text-rose-300 border border-rose-500/30 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            (click)="fetchRemote()"
+            [disabled]="shiftService.isSyncing()"
+            class="btn-sky-soft py-2.5 text-xs font-bold flex items-center justify-center gap-2"
           >
-            <span>🗑️</span>
-            <span>Borrar Datos Locales</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>Descargar de Google Drive</span>
           </button>
         </div>
       </div>
+    }
+  </section>
 
+  <!-- User Profile & Preferences Card -->
+  <section class="card-subtle flex flex-col gap-5">
+    <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
+      Preferencias de Usuario
+    </span>
+
+    <div class="flex flex-col gap-2">
+      <label for="surgeonNameInput" class="font-semibold text-slate-200 text-xs uppercase tracking-wider">
+        Nombre de la Doctora / Cirujana
+      </label>
+      <input
+        type="text"
+        id="surgeonNameInput"
+        [(ngModel)]="surgeonName"
+        placeholder="Ej: Dra. Elena Ramos"
+        class="input-clinical"
+      />
+      <p class="text-xs text-slate-400">
+        Identificador en la pantalla principal.
+      </p>
     </div>
 
-    <!-- Modal Footer -->
-    <div class="px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-950/80 backdrop-blur-md shrink-0">
+    <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-800/40 transition">
+      <div class="flex flex-col gap-0.5">
+        <span class="font-semibold text-slate-200 text-xs">Sincronización automática al recuperar cobertura</span>
+        <span class="text-[11px] text-slate-400">
+          Sincroniza en segundo plano al salir de quirófanos o plantas sin señal.
+        </span>
+      </div>
+      <input
+        type="checkbox"
+        [(ngModel)]="autoSync"
+        class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-slate-900 cursor-pointer"
+      />
+    </label>
+
+    <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-800/40 transition">
+      <div class="flex flex-col gap-0.5">
+        <span class="font-semibold text-slate-200 text-xs">Vibración háptica</span>
+        <span class="text-[11px] text-slate-400">
+          Vibración táctil al registrar guardias y pulsar botones en el móvil.
+        </span>
+      </div>
+      <input
+        type="checkbox"
+        [(ngModel)]="hapticEnabled"
+        class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-slate-900 cursor-pointer"
+      />
+    </label>
+  </section>
+
+  <!-- Local Data Management Card -->
+  <section class="card-subtle flex flex-col gap-4">
+    <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
+      Mantenimiento de Datos Locales
+    </span>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
       <button
         type="button"
-        (click)="close.emit()"
-        class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
+        (click)="openColleagueManager.emit(); close.emit()"
+        class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 text-emerald-300 border border-slate-700/80 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
       >
-        Cerrar
+        <span>👥</span>
+        <span>Equipo & Historial Previo</span>
       </button>
 
       <button
         type="button"
-        (click)="saveConfiguration()"
-        class="btn-primary"
+        (click)="clearAllData()"
+        class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-950/20 hover:bg-rose-950/40 text-rose-300 border border-rose-500/30 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
       >
-        Guardar Ajustes
+        <span>🗑️</span>
+        <span>Borrar Datos Locales</span>
       </button>
     </div>
+  </section>
+
+  <!-- Modal Footer Slot -->
+  <div modal-footer class="flex items-center gap-3">
+    <button
+      type="button"
+      (click)="close.emit()"
+      class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
+    >
+      Cerrar
+    </button>
+
+    <button
+      type="button"
+      (click)="saveConfiguration()"
+      class="btn-primary"
+    >
+      Guardar Ajustes
+    </button>
   </div>
-</div>
+</app-modal>

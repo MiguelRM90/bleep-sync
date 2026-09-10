@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ShiftService } from '../../services/shift.service';
 
@@ -7,6 +7,7 @@ import { ShiftService } from '../../services/shift.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
   readonly shiftService = inject(ShiftService);

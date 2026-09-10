@@ -65,7 +65,7 @@
                 <!-- Date & Colleague -->
                 <div class="flex items-center gap-2.5 flex-wrap">
                   <span class="text-xs sm:text-sm font-semibold text-slate-200">
-                    {{ shiftService.formatDisplayDate(shift.date) }}
+                    {{ shift.date | formatDutyDate }}
                   </span>
                   <span class="text-xs text-slate-400 font-medium">con</span>
                   <span class="text-xs sm:text-sm font-bold text-slate-100 bg-slate-800/90 px-3 py-1 rounded-xl border border-slate-700/60 shadow-sm">
@@ -165,7 +165,7 @@
                   <p class="text-xs text-slate-400 mt-1">
                     {{ item.totalShifts }} {{ item.totalShifts === 1 ? 'guardia' : 'guardias' }} juntos
                     @if (item.lastShiftDate) {
-                      • Última: {{ shiftService.formatDisplayDate(item.lastShiftDate) }} ({{ item.lastRole }})
+                      • Última: {{ item.lastShiftDate | formatDutyDate }} ({{ item.lastRole }})
                     }
                   </p>
                 </div>

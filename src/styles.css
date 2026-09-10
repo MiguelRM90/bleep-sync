@@ -116,7 +116,9 @@ app-header,
 app-duty-checker,
 app-duty-logger,
 app-metrics-summary,
-app-config-modal {
+app-config-modal,
+app-colleague-modal,
+app-modal {
   display: block;
 }
 

@@ -24,7 +24,6 @@
   <main class="max-w-xl w-full mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6 sm:gap-7 flex-1">
     <!-- Duty Checker: Colleague Selector & Dynamic Recommendation -->
     <app-duty-checker
-      (colleagueChange)="onColleagueChanged($event)"
       (recommendationApplied)="onRecommendationApplied($event)"
       (openColleagueManager)="isColleagueModalOpen.set(true)"
     ></app-duty-checker>
@@ -94,4 +93,3 @@
     </div>
   }
 </div>
-
