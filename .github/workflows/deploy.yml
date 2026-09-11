@@ -1,4 +1,4 @@
-name: Deploy BleepSync to GitHub Pages
+name: Deploy bleep-sync to GitHub Pages
 
 on:
   push:

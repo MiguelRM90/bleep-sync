@@ -78,8 +78,8 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/MiguelRM90/BleepSync.git
-cd BleepSync
+git clone https://github.com/MiguelRM90/bleep-sync.git
+cd bleep-sync
 
 # 2. Install dependencies
 npm install
@@ -131,7 +131,7 @@ This repository includes an automated GitHub Actions workflow in [`.github/workf
 3. Under **Build and deployment** > **Source**, select **GitHub Actions**.
 4. Every push to `main` will automatically build the standalone Angular application and deploy it to:
    ```
-   https://<your-username>.github.io/BleepSync/
+   https://<your-username>.github.io/bleep-sync/
    ```
 
 To test the GitHub Pages build locally:

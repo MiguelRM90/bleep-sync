@@ -53,7 +53,7 @@ Specifically:
 
 ### 6. Contact & Open Source
 For any questions regarding privacy or source code inspection:  
-👉 **[https://github.com/MiguelRM90/BleepSync](https://github.com/MiguelRM90/BleepSync)**
+👉 **[https://github.com/MiguelRM90/bleep-sync](https://github.com/MiguelRM90/bleep-sync)**
 
 ---
 
@@ -106,5 +106,5 @@ El uso y la transferencia que BleepSync hace de la información recibida a trav�
 
 ### 6. Contacto
 Si tienes cualquier pregunta sobre esta política de privacidad o sobre el funcionamiento de BleepSync, puedes abrir una incidencia o contactar a través del repositorio oficial del proyecto:  
-👉 **[https://github.com/MiguelRM90/BleepSync](https://github.com/MiguelRM90/BleepSync)**
+👉 **[https://github.com/MiguelRM90/bleep-sync](https://github.com/MiguelRM90/bleep-sync)**
 
