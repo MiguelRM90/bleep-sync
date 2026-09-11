@@ -1,6 +1,6 @@
 # 🔒 Política de Privacidad / Privacy Policy — BleepSync
 
-**Last updated / Última actualización:** 2026/09/10
+**Last updated / Última actualización:** 2026/09/11
 
 ---
 
@@ -25,10 +25,10 @@ We operate under a strict **local-first and privacy-by-design** philosophy:
 BleepSync requests the absolute minimum necessary permissions to function:
 
 1. **`https://www.googleapis.com/auth/drive.file`**:
-   * **Purpose:** Create, read, and update the spreadsheet titled `Guardias BleepSync` in your private Google Drive.
+   * **Purpose:** Create, read, and update the spreadsheet titled `Guardias BleepSync` in your private Google Drive via Google Drive API v3 and Google Sheets API v4.
    * **Guarantee:** This scope **strictly prevents** access to any other documents, photos, or files in your Google Drive. It is sandboxed solely to files created by or explicitly opened with BleepSync.
-2. **`https://www.googleapis.com/auth/userinfo.email`** & **`.../userinfo.profile`**:
-   * **Purpose:** Display your connected Google identity within the app's settings screen.
+2. **`https://www.googleapis.com/auth/userinfo.email`**, **`.../userinfo.profile`**, & **`openid`**:
+   * **Purpose:** Securely identify and display your connected Google identity within the app's settings screen.
 
 ---
 
@@ -47,7 +47,7 @@ Specifically:
 * **Encryption in Transit:** All traffic between BleepSync and Google APIs travels across secure HTTPS/TLS encrypted channels.
 * **Revoking Access:** You can disconnect at any time from the BleepSync Settings modal, or permanently revoke permissions at any time via your Google Security Dashboard:  
   👉 [https://myaccount.google.com/permissions](https://myaccount.google.com/permissions)
-* **Data Erasure:** Deleting your local browser storage and/or deleting the `Guardias BleepSync` sheet from your Google Drive permanently purges your data.
+* **Data Erasure:** You have full control over your data at all times. You can trigger complete data erasure directly inside the app ("Eliminar Todos los Datos" in Settings), which immediately wipes all local browser storage and clears all recorded duty rows in your Google Sheet. Additionally, manually deleting the `Guardias BleepSync` sheet from your Google Drive or clearing your browser storage permanently purges your data.
 
 ---
 
@@ -80,10 +80,10 @@ En BleepSync creemos firmemente en la **privacidad por diseño (Privacy by Desig
 Cuando conectas BleepSync con Google, se solicitan exclusivamente los permisos mínimos necesarios:
 
 1. **`https://www.googleapis.com/auth/drive.file`**:
-   * **Propósito:** Permite a la app crear y actualizar una única hoja de cálculo llamada `Guardias BleepSync` en tu Google Drive.
+   * **Propósito:** Permite a la app crear y actualizar una única hoja de cálculo llamada `Guardias BleepSync` en tu Google Drive mediante Google Drive API v3 y Google Sheets API v4.
    * **Garantía:** Este permiso **NO** da acceso a ver, leer ni modificar el resto de tus archivos personales en Google Drive. Solo permite interactuar con los archivos que la propia aplicación ha creado.
-2. **`https://www.googleapis.com/auth/userinfo.email`** y **`.../userinfo.profile`**:
-   * **Propósito:** Identificar visualmente la sesión activa en el panel de ajustes de la aplicación.
+2. **`https://www.googleapis.com/auth/userinfo.email`**, **`.../userinfo.profile`** y **`openid`**:
+   * **Propósito:** Identificar y autenticar visualmente la sesión activa en el panel de ajustes de la aplicación.
 
 ---
 
@@ -100,7 +100,7 @@ El uso y la transferencia que BleepSync hace de la información recibida a trav�
 * **Cifrado en tránsito:** Toda comunicación entre BleepSync y las APIs de Google se realiza mediante conexiones seguras cifradas con HTTPS/TLS.
 * **Revocación en cualquier momento:** Puedes desconectar tu cuenta desde el modal de Ajustes de BleepSync en cualquier momento. También puedes revocar el acceso de forma inmediata y permanente a través del portal de seguridad de tu cuenta de Google en:  
   👉 [https://myaccount.google.com/permissions](https://myaccount.google.com/permissions)
-* **Eliminación de datos:** Si deseas borrar todos tus turnos, puedes eliminar la hoja `Guardias BleepSync` directamente desde tu Google Drive o borrar los datos locales de la app limpiando el almacenamiento de tu navegador.
+* **Eliminación total de datos:** Tienes control total sobre tus datos en todo momento. Puedes ejecutar el borrado completo directamente desde la app mediante el botón «Eliminar Todos los Datos» en Ajustes, lo que vacía de inmediato el almacenamiento local de tu navegador y borra todas las filas registradas en tu hoja de Google Drive. También puedes eliminar manualmente la hoja `Guardias BleepSync` en Drive o borrar la memoria caché de tu navegador.
 
 ---
 

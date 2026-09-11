@@ -22,8 +22,7 @@ export class ConfigModalComponent {
 
   readonly close = output<void>();
   readonly openColleagueManager = output<void>();
-
-  readonly showPrivacyDetails = signal<boolean>(false);
+  readonly openTutorial = output<void>();
 
   surgeonName = this.shiftService.config().currentSurgeonName;
   hapticEnabled = this.shiftService.config().hapticFeedbackEnabled;
@@ -65,9 +64,33 @@ export class ConfigModalComponent {
     this.shiftService.fetchRemoteShifts();
   }
 
-  clearAllData(): void {
-    if (confirm('¿Estás seguro de que deseas vaciar todas las guardias locales? Esta acción no se puede deshacer.')) {
-      this.shiftService.resetData();
+  readonly isDeleting = signal<boolean>(false);
+
+  async clearAllData(): Promise<void> {
+    const isDriveConnected = this.googleAuth.isConnected();
+    const confirmMessage = isDriveConnected
+      ? '⚠️ ¡ATENCIÓN! ACCIÓN IRREVERSIBLE ⚠️\n\n' +
+        '¿Estás seguro de que deseas ELIMINAR TODOS LOS DATOS?\n\n' +
+        '• Se borrarán todas las guardias en este dispositivo.\n' +
+        '• Se vaciarán TODAS las filas de tu hoja en Google Drive ("Guardias BleepSync").\n' +
+        '• Se restablecerán las estadísticas y el historial de rotación de adjuntos.\n\n' +
+        'Esta acción NO se puede deshacer.\n\n' +
+        '¿Deseas proceder con el borrado total?'
+      : '⚠️ ¡ATENCIÓN! ACCIÓN IRREVERSIBLE ⚠️\n\n' +
+        '¿Estás seguro de que deseas ELIMINAR TODAS LAS GUARDIAS?\n\n' +
+        '• Se borrarán todas las guardias guardadas en este dispositivo.\n' +
+        '• Se restablecerán las estadísticas y el historial de rotación de adjuntos.\n\n' +
+        'Esta acción NO se puede deshacer.\n\n' +
+        '¿Deseas proceder con el borrado total?';
+
+    if (!confirm(confirmMessage)) return;
+
+    this.isDeleting.set(true);
+    try {
+      await this.shiftService.resetData();
+      this.close.emit();
+    } finally {
+      this.isDeleting.set(false);
     }
   }
 }

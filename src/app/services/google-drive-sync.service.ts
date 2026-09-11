@@ -166,11 +166,11 @@ export class GoogleDriveSyncService {
   }
 
   /**
-   * Clear all data rows in the Google Sheet (A2:G), preserving header row
+   * Clear all data rows in the Google Sheet (A2:Z), preserving header row
    */
   async clearRemoteDataRows(accessToken: string, spreadsheetId: string): Promise<void> {
     const clearUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
-      `${SHEET_NAME}!A2:G`
+      `${SHEET_NAME}!A2:Z`
     )}:clear`;
 
     const res = await fetch(clearUrl, {

@@ -6,6 +6,7 @@ import { DutyLoggerComponent } from './components/duty-logger/duty-logger.compon
 import { MetricsSummaryComponent } from './components/metrics-summary/metrics-summary.component';
 import { ConfigModalComponent } from './components/config-modal/config-modal.component';
 import { ColleagueModalComponent } from './components/colleague-modal/colleague-modal.component';
+import { TutorialModalComponent } from './components/tutorial-modal/tutorial-modal.component';
 import { ShiftService } from './services/shift.service';
 import { DutySessionStoreService } from './services/duty-session-store.service';
 import { ToastNotificationService } from './services/toast-notification.service';
@@ -23,6 +24,7 @@ import { BeforeInstallPromptEvent } from './models/pwa.model';
     MetricsSummaryComponent,
     ConfigModalComponent,
     ColleagueModalComponent,
+    TutorialModalComponent,
   ],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +36,7 @@ export class AppComponent {
 
   readonly isConfigOpen = signal<boolean>(false);
   readonly isColleagueModalOpen = signal<boolean>(false);
+  readonly isTutorialOpen = signal<boolean>(false);
   readonly deferredPrompt = signal<BeforeInstallPromptEvent | null>(null);
 
   constructor() {

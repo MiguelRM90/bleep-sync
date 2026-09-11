@@ -1,0 +1,436 @@
+<app-modal
+  title="Cómo funciona BleepSync"
+  subtitle="Guía rápida en 5 pasos para dominar tus guardias"
+  maxWidthClass="max-w-2xl"
+  (close)="finishTutorial()"
+>
+  <!-- Modal Icon Slot -->
+  <div modal-icon class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-sm shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+    </svg>
+  </div>
+
+  <!-- Stepper Navigation Header -->
+  <div class="flex flex-col gap-2 -mt-1 pb-2 border-b border-slate-800">
+    <div class="flex items-center justify-between text-xs text-slate-400 font-medium px-1">
+      <span>Paso {{ currentStep() }} de {{ totalSteps }}: <strong class="text-emerald-300 font-semibold">{{ steps[currentStep() - 1].title }}</strong></span>
+      <span class="text-[11px] text-slate-500 hidden sm:inline">Haz clic en cualquier paso para navegar</span>
+    </div>
+
+    <!-- Stepper Navigation Pills -->
+    <div class="grid grid-cols-5 gap-1.5 p-1 bg-slate-950/60 rounded-xl border border-slate-800/80">
+      @for (step of steps; track step.id) {
+        <button
+          type="button"
+          (click)="setStep(step.id)"
+          class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg text-xs font-semibold transition cursor-pointer"
+          [ngClass]="{
+            'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm': currentStep() === step.id,
+            'bg-slate-900/60 text-slate-300 hover:bg-slate-800 hover:text-slate-100': currentStep() !== step.id && step.id < currentStep(),
+            'text-slate-500 hover:text-slate-300 hover:bg-slate-900/40': currentStep() !== step.id && step.id > currentStep()
+          }"
+        >
+          <span class="text-sm sm:text-xs">{{ step.icon }}</span>
+          <span class="text-[10px] sm:text-xs tracking-tight truncate">{{ step.shortTitle }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Step Contents -->
+  <div class="flex flex-col gap-4 text-sm leading-relaxed text-slate-200 min-h-[320px]">
+
+    <!-- ================= PASO 1: INSTALAR PWA ================= -->
+    @if (currentStep() === 1) {
+      <div class="flex flex-col gap-4 animate-fade-in">
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/25 flex items-start gap-3.5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xl shrink-0">
+            📱
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-100 text-sm sm:text-base">Instala BleepSync como App móvil</h4>
+            <p class="text-xs text-slate-300 mt-1">
+              BleepSync es una <strong>Progressive Web App (PWA)</strong>. No hace falta buscarla en Google Play ni App Store: se instala directamente en la pantalla de inicio de tu móvil como cualquier otra aplicación.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Android Guide -->
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col gap-2.5">
+            <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+              <span>🤖</span>
+              <span>En Android (Google Chrome)</span>
+            </div>
+            <ol class="text-xs text-slate-300 flex flex-col gap-1.5 list-decimal list-inside">
+              <li>Abre BleepSync en <strong>Google Chrome</strong>.</li>
+              <li>Pulsa el botón de <strong>tres puntos (⋮)</strong> arriba a la derecha.</li>
+              <li>Toca en <strong>«Instalar aplicación»</strong> o <strong>«Añadir a pantalla de inicio»</strong>.</li>
+            </ol>
+            @if (deferredPrompt()) {
+              <button
+                type="button"
+                (click)="triggerInstallPwa()"
+                class="mt-1 w-full py-2 px-3 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <span>📲</span>
+                <span>Instalar en este dispositivo</span>
+              </button>
+            }
+          </div>
+
+          <!-- iOS Guide -->
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col gap-2.5">
+            <div class="flex items-center gap-2 text-sky-400 font-bold text-xs uppercase tracking-wider">
+              <span>🍏</span>
+              <span>En iPhone / iPad (Safari)</span>
+            </div>
+            <ol class="text-xs text-slate-300 flex flex-col gap-1.5 list-decimal list-inside">
+              <li>Abre BleepSync en el navegador <strong>Safari</strong>.</li>
+              <li>Pulsa el botón <strong>Compartir</strong> (cuadrado con flecha hacia arriba <span class="font-bold text-slate-100">⎋</span> en la barra inferior).</li>
+              <li>Baja por las opciones y pulsa en <strong>«Añadir a la pantalla de inicio» (+)</strong>.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 text-xs text-slate-300 flex items-center gap-2.5">
+          <span class="text-base shrink-0">⚡</span>
+          <span>
+            <strong>Ventaja quirúrgica:</strong> Se abre a pantalla completa sin barras de navegador y funciona al <strong>100% offline</strong> en quirófanos o sótanos sin cobertura.
+          </span>
+        </div>
+      </div>
+    }
+
+    <!-- ================= PASO 2: GOOGLE DRIVE ================= -->
+    @if (currentStep() === 2) {
+      <div class="flex flex-col gap-4 animate-fade-in">
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/25 flex items-start gap-3.5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xl shrink-0">
+            ☁️
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-100 text-sm sm:text-base">Sincronización con Google Drive (Excel)</h4>
+            <p class="text-xs text-slate-300 mt-1">
+              Conecta tu cuenta de Google para que todas tus guardias queden guardadas automáticamente en una hoja de <strong>Google Sheets («Guardias BleepSync»)</strong> en tu propio Drive.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col gap-3">
+          <h5 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <span>🔄</span>
+            <span>¿Cómo funciona dentro del quirófano?</span>
+          </h5>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-300">
+            <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800/80 flex flex-col gap-1">
+              <span class="font-bold text-amber-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                Sin cobertura (Offline)
+              </span>
+              <p class="text-slate-400">
+                Al registrar la guardia, se guarda al instante en tu móvil. Verás una etiqueta <em>«1 pend.»</em> arriba. ¡Tus datos están protegidos!
+              </p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800/80 flex flex-col gap-1">
+              <span class="font-bold text-emerald-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                Con cobertura (Online)
+              </span>
+              <p class="text-slate-400">
+                En cuanto salgas a una zona con cobertura o abras la app, se sincroniza sola con tu hoja de cálculo sin que tengas que hacer nada.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Drive connection status card -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-700/80 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <svg class="w-7 h-7 shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.58-5.17 3.58-9.12z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+            </svg>
+            <div>
+              <p class="text-xs font-bold text-slate-100">Estado de Google Drive</p>
+              @if (shiftService.googleAuthService.isConnected()) {
+                <p class="text-[11px] text-emerald-400 font-medium">
+                  Conectado como {{ shiftService.googleAuthService.userProfile()?.email || 'cuenta Google' }}
+                </p>
+              } @else {
+                <p class="text-[11px] text-slate-400">No conectado todavía</p>
+              }
+            </div>
+          </div>
+
+          @if (!shiftService.googleAuthService.isConnected()) {
+            <button
+              type="button"
+              (click)="triggerGoogleConnect()"
+              [disabled]="shiftService.googleAuthService.isAuthenticating()"
+              class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-100 text-slate-900 transition active:scale-95 cursor-pointer shrink-0 disabled:opacity-50"
+            >
+              @if (shiftService.googleAuthService.isAuthenticating()) {
+                <span>Conectando...</span>
+              } @else {
+                <span>Conectar ahora</span>
+              }
+            </button>
+          } @else {
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+              ✓ Sincronizado
+            </span>
+          }
+        </div>
+
+        <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
+          <span class="text-emerald-400 mt-0.5 shrink-0">🔒</span>
+          <p class="leading-relaxed">
+            <strong>Privacidad garantizada:</strong> BleepSync cumple con la directiva <em>Limited Use</em> de Google. Tus datos nunca se venden ni se usan para publicidad o IA. Consulta nuestra
+            <a
+              href="https://github.com/MiguelRM90/BleepSync/blob/main/docs/PRIVACY_POLICY.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-emerald-400 hover:text-emerald-300 font-semibold underline underline-offset-2"
+            >Política de Privacidad</a>.
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- ================= PASO 3: AÑADIR PERSONAS Y FUNCIONAR ================= -->
+    @if (currentStep() === 3) {
+      <div class="flex flex-col gap-4 animate-fade-in">
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/25 flex items-start gap-3.5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xl shrink-0">
+            👥
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-100 text-sm sm:text-base">Añadir personas y registrar tu guardia</h4>
+            <p class="text-xs text-slate-300 mt-1">
+              BleepSync calcula la rotación para que el reparto entre <strong>Planta</strong> y <strong>Urgencias</strong> sea rigurosamente alterno y equitativo.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <!-- Sub-step 1 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+              1
+            </span>
+            <div class="flex-1">
+              <strong class="text-slate-100 text-xs block">Añade a tus adjuntos habituales</strong>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Pulsa el botón <strong>+</strong> al lado de <em>«Adjunto de Cirugía»</em> en la pantalla principal para registrar a los compañeros con los que sueles coincidir de guardia.
+              </p>
+            </div>
+          </div>
+
+          <!-- Sub-step 2 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+              2
+            </span>
+            <div class="flex-1">
+              <strong class="text-slate-100 text-xs block">Selecciona con quién estás hoy</strong>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Al elegir a tu compañero, BleepSync comprueba automáticamente quién hizo Planta y quién Urgencias la última vez y te mostrará la recomendación: <em>«Te toca Planta»</em> o <em>«Te toca Urgencias»</em>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Sub-step 3 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+              3
+            </span>
+            <div class="flex-1">
+              <strong class="text-slate-100 text-xs block">Aplica y guarda</strong>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Pulsa en <strong>«Aplicar sugerencia»</strong>, añade quirófanos o notas si lo deseas, y pulsa <strong>«Guardar Guardia»</strong>. ¡Hecho en 3 segundos!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="triggerOpenColleagues()"
+          class="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+        >
+          <span>👥</span>
+          <span>Abrir gestión de adjuntos e historial previo</span>
+        </button>
+      </div>
+    }
+
+    <!-- ================= PASO 4: BORRADO Y MANTENIMIENTO ================= -->
+    @if (currentStep() === 4) {
+      <div class="flex flex-col gap-4 animate-fade-in">
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-rose-950/30 via-slate-900 to-slate-900 border border-rose-500/25 flex items-start gap-3.5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-center text-xl shrink-0">
+            🗑️
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-100 text-sm sm:text-base">Historial y Borrado de datos</h4>
+            <p class="text-xs text-slate-300 mt-1">
+              Tienes total flexibilidad para corregir errores puntuales o reiniciar todos los datos si lo necesitas.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Option A: Delete single row -->
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col gap-2.5">
+            <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
+              <span>🗑️</span>
+              <span>Borrar una guardia del historial</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Si te equivocaste al introducir una fecha, compañero o rol:
+            </p>
+            <ol class="text-xs text-slate-400 flex flex-col gap-1.5 list-decimal list-inside">
+              <li>Ve a la sección <strong>«Historial de Guardias»</strong> (abajo).</li>
+              <li>A la derecha de la fila, pulsa el icono de papelera <strong>🗑️</strong>.</li>
+              <li>La guardia se eliminará al instante del móvil y de tu hoja de Google Sheets.</li>
+            </ol>
+          </div>
+
+          <!-- Option B: Clear all data in settings -->
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col gap-2.5">
+            <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+              <span>⚙️</span>
+              <span>Borrar todos los datos</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Si quieres empezar de cero (ej: nuevo año o tras hacer pruebas):
+            </p>
+            <ol class="text-xs text-slate-400 flex flex-col gap-1.5 list-decimal list-inside">
+              <li>Pulsa el botón de <strong>Ajustes ⚙️</strong> arriba a la derecha.</li>
+              <li>En la sección <strong>«Mantenimiento de Datos»</strong>, pulsa el botón rojo <strong>«Eliminar Todos los Datos»</strong>.</li>
+              <li>Te pedirá confirmación de seguridad antes de vaciarlo todo.</li>
+            </ol>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="triggerOpenConfig()"
+          class="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+        >
+          <span>⚙️</span>
+          <span>Ver sección de Ajustes y Mantenimiento de Datos</span>
+        </button>
+      </div>
+    }
+
+    <!-- ================= PASO 5: CONSEJOS PRO ================= -->
+    @if (currentStep() === 5) {
+      <div class="flex flex-col gap-4 animate-fade-in">
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/25 flex items-start gap-3.5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xl shrink-0">
+            💡
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-100 text-sm sm:text-base">Consejos para el día a día</h4>
+            <p class="text-xs text-slate-300 mt-1">
+              Pequeños detalles pensados específicamente para el trabajo de guardia hospitalaria.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <!-- Tip 1: Pre-existing history -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-3">
+            <span class="text-lg shrink-0">⚖️</span>
+            <div class="text-xs">
+              <strong class="text-slate-100 block font-semibold">Historial previo de adjuntos</strong>
+              <p class="text-slate-400 mt-0.5">
+                Si antes de usar BleepSync ya tenías guardias acumuladas con algún adjunto, entra en <em>«Historial Adjuntos»</em> y pon cuántas llevabais cada uno. Así el cálculo de la rotación será justo desde el primer día.
+              </p>
+            </div>
+          </div>
+
+          <!-- Tip 2: Haptic feedback -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-3">
+            <span class="text-lg shrink-0">📳</span>
+            <div class="text-xs">
+              <strong class="text-slate-100 block font-semibold">Vibración háptica</strong>
+              <p class="text-slate-400 mt-0.5">
+                En Ajustes ⚙️ puedes mantener activada la vibración táctil para sentir una confirmación física en el móvil al pulsar botones o guardar guardias, ideal con guantes o en quirófano.
+              </p>
+            </div>
+          </div>
+
+          <!-- Tip 3: Surgeon name -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-3">
+            <span class="text-lg shrink-0">🩺</span>
+            <div class="text-xs">
+              <strong class="text-slate-100 block font-semibold">Tu nombre en la cabecera</strong>
+              <p class="text-slate-400 mt-0.5">
+                En Ajustes ⚙️ puedes cambiar tu nombre («Cirujano Actual») para que aparezca correctamente registrado en tu hoja de Google Sheets.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- Modal Footer -->
+  <div modal-footer class="w-full flex items-center justify-between gap-2 sm:gap-3">
+    <!-- Left: Close / Skip -->
+    <button
+      type="button"
+      (click)="finishTutorial()"
+      class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+    >
+      Cerrar
+    </button>
+
+    <!-- Right: Back & Next / Finish -->
+    <div class="flex items-center gap-2">
+      @if (currentStep() > 1) {
+        <button
+          type="button"
+          (click)="prevStep()"
+          class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          <span>Anterior</span>
+        </button>
+      }
+
+      @if (currentStep() < totalSteps) {
+        <button
+          type="button"
+          (click)="nextStep()"
+          class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-950/50"
+        >
+          <span>Siguiente</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      } @else {
+        <button
+          type="button"
+          (click)="finishTutorial()"
+          class="btn-primary"
+        >
+          <span>¡Entendido, a quirófano!</span>
+          <span>🚀</span>
+        </button>
+      }
+    </div>
+  </div>
+</app-modal>
+

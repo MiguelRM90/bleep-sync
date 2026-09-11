@@ -1,6 +1,9 @@
 <div class="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans pb-10">
   <!-- Header with Clinical Status and Settings -->
-  <app-header (openConfig)="isConfigOpen.set(true)"></app-header>
+  <app-header
+    (openConfig)="isConfigOpen.set(true)"
+    (openTutorial)="isTutorialOpen.set(true)"
+  ></app-header>
 
   <!-- PWA Install Prompt Banner (if deferred prompt is caught) -->
   @if (deferredPrompt() !== null) {
@@ -39,12 +42,27 @@
 
   <!-- Footer Info -->
   <footer class="max-w-xl mx-auto px-4 pt-4 text-center text-xs text-slate-500">
-    <p class="flex items-center justify-center gap-1.5 font-medium">
+    <p class="flex items-center justify-center gap-2 font-medium flex-wrap">
       <span>BleepSync PWA</span>
       <span>•</span>
       <span>Respaldo con Google Sheets</span>
       <span>•</span>
-      <span>Offline-Ready</span>
+      <button
+        type="button"
+        (click)="isTutorialOpen.set(true)"
+        class="text-emerald-400 hover:text-emerald-300 underline underline-offset-2 transition cursor-pointer"
+      >
+        📖 Guía de uso
+      </button>
+      <span>•</span>
+      <a
+        href="https://github.com/MiguelRM90/BleepSync/blob/main/docs/PRIVACY_POLICY.md"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-slate-400 hover:text-slate-200 underline underline-offset-2 transition inline-flex items-center gap-1"
+      >
+        <span>🔒 Privacidad</span>
+      </a>
     </p>
   </footer>
 
@@ -53,6 +71,7 @@
     <app-config-modal
       (close)="isConfigOpen.set(false)"
       (openColleagueManager)="isColleagueModalOpen.set(true)"
+      (openTutorial)="isTutorialOpen.set(true)"
     ></app-config-modal>
   }
 
@@ -62,6 +81,17 @@
       (close)="isColleagueModalOpen.set(false)"
       (colleagueSelected)="onColleagueAddedOrSelected($event)"
     ></app-colleague-modal>
+  }
+
+  <!-- Tutorial & Getting Started Modal -->
+  @if (isTutorialOpen()) {
+    <app-tutorial-modal
+      [deferredPrompt]="deferredPrompt()"
+      (close)="isTutorialOpen.set(false)"
+      (openColleagueManager)="isColleagueModalOpen.set(true)"
+      (openConfig)="isConfigOpen.set(true)"
+      (installPwa)="installPwa()"
+    ></app-tutorial-modal>
   }
 
   <!-- Toast Feedback Floating Notification -->

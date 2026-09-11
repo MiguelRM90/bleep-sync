@@ -61,10 +61,21 @@
         </button>
 
         <div class="p-3.5 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
-          <span class="text-emerald-400 text-sm mt-0.5">🔒</span>
-          <p class="leading-relaxed">
-            <strong>100% privado y seguro:</strong> BleepSync solo puede acceder a la hoja de cálculo que crea para tus guardias. No tiene acceso a tus correos, fotos ni a ningún otro archivo de tu Google Drive.
-          </p>
+          <span class="text-emerald-400 text-sm mt-0.5 shrink-0">🔒</span>
+          <div class="leading-relaxed flex flex-col gap-1">
+            <p>
+              <strong>100% privado y seguro:</strong> BleepSync solo puede acceder a la hoja de cálculo que crea para tus guardias. No tiene acceso a tus correos, fotos ni a ningún otro archivo de tu Google Drive.
+            </p>
+            <a
+              href="https://github.com/MiguelRM90/BleepSync/blob/main/docs/PRIVACY_POLICY.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-emerald-400 hover:text-emerald-300 font-semibold underline underline-offset-2 inline-flex items-center gap-1"
+            >
+              <span>Consultar Política de Privacidad oficial</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
         </div>
       </div>
     }
@@ -209,10 +220,31 @@
     </label>
   </section>
 
-  <!-- Local Data Management Card -->
+  <!-- Quick Guide / Tutorial Access -->
+  <button
+    type="button"
+    (click)="openTutorial.emit(); close.emit()"
+    class="w-full p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 hover:bg-slate-850 text-emerald-300 border border-emerald-500/30 transition active:scale-[0.99] cursor-pointer flex items-center justify-between shadow-sm"
+  >
+    <div class="flex items-center gap-3">
+      <span class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-lg shrink-0">
+        📖
+      </span>
+      <div class="text-left">
+        <p class="font-bold text-slate-100 text-xs">Tutorial y Guía de Uso</p>
+        <p class="text-[11px] text-slate-400 font-normal">PWA, sincronización Drive, añadir equipo y borrado</p>
+      </div>
+    </div>
+    <span class="text-emerald-400 font-bold text-xs flex items-center gap-1">
+      <span>Ver</span>
+      <span>&rarr;</span>
+    </span>
+  </button>
+
+  <!-- Data Management Card -->
   <section class="card-subtle flex flex-col gap-4">
     <span class="text-xs font-bold uppercase tracking-wider text-slate-300 block pb-1 border-b border-slate-800/70">
-      Mantenimiento de Datos Locales
+      Mantenimiento de Datos
     </span>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
       <button
@@ -227,12 +259,25 @@
       <button
         type="button"
         (click)="clearAllData()"
-        class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-950/20 hover:bg-rose-950/40 text-rose-300 border border-rose-500/30 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+        [disabled]="isDeleting()"
+        class="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-950/25 hover:bg-rose-950/50 text-rose-300 border border-rose-500/40 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span>🗑️</span>
-        <span>Borrar Datos Locales</span>
+        @if (isDeleting()) {
+          <span class="w-3.5 h-3.5 border-2 border-rose-400 border-t-transparent rounded-full animate-spin"></span>
+          <span>Eliminando todo...</span>
+        } @else {
+          <span>🗑️</span>
+          <span>Eliminar Todos los Datos</span>
+        }
       </button>
     </div>
+    <p class="text-[11px] text-slate-400">
+      @if (googleAuth.isConnected()) {
+        Elimina todas las guardias guardadas en este dispositivo y vacía todas las filas de la hoja en tu Google Drive.
+      } @else {
+        Elimina todas las guardias guardadas en la memoria local de este dispositivo.
+      }
+    </p>
   </section>
 
   <!-- Modal Footer Slot -->

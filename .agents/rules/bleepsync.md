@@ -6,7 +6,7 @@
 - **Framework**: Angular 22+ (Strict TypeScript, Standalone Components, Signal-based reactivity)
 - **Styling**: Tailwind CSS v4 (`@import "tailwindcss";`), custom dark clinical theme with CSS variables in `src/styles.css`
 - **Reactivity Model**: Zoneless-ready, 100% Angular Signals (`signal`, `computed`, `effect`, `linkedSignal`, Resource APIs)
-- **Data Persistence**: Offline-first via `LocalStorage` (`bleepsync_shifts_v1`, `bleepsync_config_v1`) + optional Cloud Sync via Google Drive API v3 (OAuth2 Token Client / GIS).
+- **Data Persistence**: Offline-first via `LocalStorage` (`bleepsync_shifts_v1`, `bleepsync_config_v1`, `bleepsync_colleagues_v1`, `bleepsync_duty_session_v1`) + optional Cloud Sync via Google Drive API v3 and Google Sheets API v4 (OAuth2 Token Client / GIS).
 
 ---
 
@@ -59,11 +59,14 @@ There are 3 surgical shift roles:
 The app calculates parity between colleagues. When suggesting roles:
 - If a colleague has done significantly more `'Planta'`, suggest `'Urgencias'` next.
 - Flag imbalance warnings when total shifts $\ge 3$ and $|Planta\% - Urgencias\%| \ge 40\%$.
+- Pre-existing history support: Colleagues can be initialized with baseline shifts (`initialPlanta`, `initialUrgencias`) so equity calculations reflect past rotations.
 
-### C. Offline-First & Google Drive Sync
+### C. Offline-First & Google Drive / Sheets Sync
 - **Local first**: Never block UI operations waiting for network calls. Save immediately to `LocalStorage` and mark shift as `syncStatus: 'pending'`.
-- **Google OAuth**: Uses Google Identity Services (GIS) token client (`initTokenClient`) without backend secrets. Scope is strictly `https://www.googleapis.com/auth/drive.appdata` (or drive file).
-- **Conflict Resolution**: Merge strategies must preserve local offline edits while resolving remote updates by `updatedAt` / `createdAt` timestamps.
+- **Google OAuth**: Uses Google Identity Services (GIS) token client (`initTokenClient`) without backend secrets. Scopes are strictly `https://www.googleapis.com/auth/drive.file`, `https://www.googleapis.com/auth/userinfo.email`, `https://www.googleapis.com/auth/userinfo.profile`, and `openid`.
+- **Spreadsheet Storage**: Syncs duty shifts directly with a dedicated Google Spreadsheet titled `Guardias BleepSync` (tab `Guardias`) using Google Sheets API v4.
+- **Conflict Resolution**: Merge strategies preserve local offline edits while resolving remote updates by `updatedAt` / `createdAt` timestamps.
+- **Data Erasure**: Supports complete local and remote data wipe (resetting device storage and clearing all rows `A2:Z` in the remote spreadsheet).
 
 ---
 
