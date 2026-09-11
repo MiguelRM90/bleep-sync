@@ -72,7 +72,7 @@ BleepSync is tailored for on-call surgical teams (such as General Surgery in Spa
 
 ### Prerequisites
 - Node.js 22+ or 24+
-- npm 10+ or 11+
+- pnpm 9+, 10+ or 11+ (or enabled via `corepack enable`)
 
 ### Local Development Setup
 
@@ -82,10 +82,10 @@ git clone https://github.com/MiguelRM90/bleep-sync.git
 cd bleep-sync
 
 # 2. Install dependencies
-npm install
+pnpm install
 
 # 3. Launch local development server
-npm start
+pnpm start
 ```
 
 Navigate to `http://localhost:4200` in your browser.
@@ -136,7 +136,7 @@ This repository includes an automated GitHub Actions workflow in [`.github/workf
 
 To test the GitHub Pages build locally:
 ```bash
-npm run build:gh-pages
+pnpm run build:gh-pages
 ```
 
 ---
