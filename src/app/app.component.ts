@@ -9,7 +9,8 @@ import { ColleagueModalComponent } from './components/colleague-modal/colleague-
 import { TutorialModalComponent } from './components/tutorial-modal/tutorial-modal.component';
 import { ShiftService } from './services/shift.service';
 import { DutySessionStoreService } from './services/duty-session-store.service';
-import { ToastNotificationService } from './services/toast-notification.service';
+import { PwaToastContainerComponent } from 'pwa-ui-core/components';
+import { PwaToastService, PwaService } from 'pwa-ui-core/services';
 import { DutyRole } from './models/shift.model';
 import { BeforeInstallPromptEvent } from './models/pwa.model';
 
@@ -25,14 +26,16 @@ import { BeforeInstallPromptEvent } from './models/pwa.model';
     ConfigModalComponent,
     ColleagueModalComponent,
     TutorialModalComponent,
+    PwaToastContainerComponent,
   ],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   readonly shiftService = inject(ShiftService);
+  readonly pwaService = inject(PwaService);
   private readonly sessionStore = inject(DutySessionStoreService);
-  private readonly toastService = inject(ToastNotificationService);
+  private readonly toastService = inject(PwaToastService);
 
   readonly isConfigOpen = signal<boolean>(false);
   readonly isColleagueModalOpen = signal<boolean>(false);
@@ -55,7 +58,7 @@ export class AppComponent {
 
   onRecommendationApplied(data: { colleague: string; role: DutyRole }): void {
     this.sessionStore.applyRecommendation(data.colleague, data.role);
-    this.toastService.show(`Recomendación aplicada: ${data.role}`, 'success');
+    this.toastService.success(`Recomendación aplicada: ${data.role}`);
   }
 
   async installPwa(): Promise<void> {

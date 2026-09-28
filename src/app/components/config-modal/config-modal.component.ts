@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ShiftService } from '../../services/shift.service';
 import { GoogleAuthService } from '../../services/google-auth.service';
 import { GoogleDriveSyncService } from '../../services/google-drive-sync.service';
-import { ToastNotificationService } from '../../services/toast-notification.service';
+import { PwaToastService } from 'pwa-ui-core/services';
 import { ModalComponent } from '../ui/modal/modal.component';
 
 @Component({
@@ -18,7 +18,7 @@ export class ConfigModalComponent {
   readonly shiftService = inject(ShiftService);
   readonly googleAuth = inject(GoogleAuthService);
   readonly googleDriveSync = inject(GoogleDriveSyncService);
-  private readonly toastService = inject(ToastNotificationService);
+  private readonly toastService = inject(PwaToastService);
 
   readonly close = output<void>();
   readonly openColleagueManager = output<void>();
@@ -43,7 +43,7 @@ export class ConfigModalComponent {
     if (url && typeof window !== 'undefined') {
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
-      this.toastService.show('Aún no se ha creado la hoja en Drive. Pulsa Sincronizar.', 'info');
+      this.toastService.info('Aún no se ha creado la hoja en Drive. Pulsa Sincronizar.');
     }
   }
 

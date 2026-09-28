@@ -1,17 +1,25 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  HostListener,
-  input,
-  output,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PwaModalComponent } from 'pwa-ui-core/components';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './modal.component.html',
+  imports: [CommonModule, PwaModalComponent],
+  template: `
+    <pwa-modal
+      [isOpen]="true"
+      [title]="title()"
+      [subtitle]="subtitle()"
+      [closeOnBackdrop]="closeOnBackdropClick()"
+      [maxWidth]="'36rem'"
+      (close)="close.emit()"
+    >
+      <ng-content select="[modal-icon]" modal-icon></ng-content>
+      <ng-content></ng-content>
+      <ng-content select="[modal-footer]" modal-footer></ng-content>
+    </pwa-modal>
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModalComponent {
@@ -21,15 +29,4 @@ export class ModalComponent {
   readonly closeOnBackdropClick = input<boolean>(true);
 
   readonly close = output<void>();
-
-  @HostListener('window:keydown.escape')
-  handleEscape(): void {
-    this.close.emit();
-  }
-
-  onBackdropClick(event: MouseEvent): void {
-    if (this.closeOnBackdropClick() && event.target === event.currentTarget) {
-      this.close.emit();
-    }
-  }
 }

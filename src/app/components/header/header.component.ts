@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PwaHeaderComponent } from 'pwa-ui-core/components';
 import { ShiftService } from '../../services/shift.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PwaHeaderComponent],
   templateUrl: './header.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

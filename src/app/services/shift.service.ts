@@ -3,8 +3,7 @@ import { Shift, DutyRole, ColleagueMetrics, Recommendation, AppConfig, SyncStatu
 import { GoogleAuthService } from './google-auth.service';
 import { GoogleDriveSyncService } from './google-drive-sync.service';
 import { HapticService } from './haptic.service';
-import { ToastNotificationService, ToastType } from './toast-notification.service';
-import { NetworkStatusService } from './network-status.service';
+import { PwaService, PwaToastService } from 'pwa-ui-core/services';
 import { DutyRotationCalculatorService } from './duty-rotation-calculator.service';
 import { DutyMetricsCalculatorService } from './duty-metrics-calculator.service';
 import { ShiftStorageService } from './shift-storage.service';
@@ -17,19 +16,18 @@ export class ShiftService {
   readonly googleAuthService = inject(GoogleAuthService);
   readonly googleDriveSyncService = inject(GoogleDriveSyncService);
   private readonly hapticService = inject(HapticService);
-  private readonly toastService = inject(ToastNotificationService);
-  private readonly networkService = inject(NetworkStatusService);
+  private readonly toastService = inject(PwaToastService);
+  private readonly pwaService = inject(PwaService);
   private readonly rotationCalculator = inject(DutyRotationCalculatorService);
   private readonly metricsCalculator = inject(DutyMetricsCalculatorService);
   private readonly storageService = inject(ShiftStorageService);
 
   // Reactive State Signals
   readonly shifts = signal<Shift[]>([]);
-  readonly isOnline = this.networkService.isOnline;
+  readonly isOnline = this.pwaService.isOnline;
   readonly isSyncing = signal<boolean>(false);
   readonly lastSyncTimestamp = signal<Date | null>(null);
   readonly syncError = signal<string | null>(null);
-  readonly toastMessage = this.toastService.currentToast;
 
   // App Configuration Signal
   readonly config = signal<AppConfig>({
@@ -97,9 +95,9 @@ export class ShiftService {
     });
 
     // React to network reconnection for auto-sync
-    let wasOnline = this.networkService.isOnline();
+    let wasOnline = this.pwaService.isOnline();
     effect(() => {
-      const online = this.networkService.isOnline();
+      const online = this.pwaService.isOnline();
       if (online && !wasOnline) {
         this.showToast('Conexión reestablecida. Verificando sincronización...', 'info');
         if (this.config().autoSyncOnReconnect && this.pendingSyncCount() > 0) {
@@ -397,8 +395,14 @@ export class ShiftService {
   /**
    * Display temporary toast notification
    */
-  showToast(text: string, type: ToastType = 'info'): void {
-    this.toastService.show(text, type);
+  showToast(text: string, type: 'success' | 'info' | 'error' = 'info'): void {
+    if (type === 'success') {
+      this.toastService.success(text);
+    } else if (type === 'error') {
+      this.toastService.error(text);
+    } else {
+      this.toastService.info(text);
+    }
   }
 
   /**
