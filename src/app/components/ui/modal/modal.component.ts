@@ -6,20 +6,7 @@ import { PwaModalComponent } from 'pwa-ui-core/components';
   selector: 'app-modal',
   standalone: true,
   imports: [CommonModule, PwaModalComponent],
-  template: `
-    <pwa-modal
-      [isOpen]="true"
-      [title]="title()"
-      [subtitle]="subtitle()"
-      [closeOnBackdrop]="closeOnBackdropClick()"
-      [maxWidth]="'36rem'"
-      (close)="close.emit()"
-    >
-      <ng-content select="[modal-icon]" modal-icon></ng-content>
-      <ng-content></ng-content>
-      <ng-content select="[modal-footer]" modal-footer></ng-content>
-    </pwa-modal>
-  `,
+  templateUrl: './modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModalComponent {

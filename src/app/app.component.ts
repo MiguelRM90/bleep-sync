@@ -1,24 +1,22 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HeaderComponent } from './components/header/header.component';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { PwaToastContainerComponent } from 'pwa-ui-core/components';
+import { PwaService, PwaToastService } from 'pwa-ui-core/services';
+import { ColleagueModalComponent } from './components/colleague-modal/colleague-modal.component';
+import { ConfigModalComponent } from './components/config-modal/config-modal.component';
 import { DutyCheckerComponent } from './components/duty-checker/duty-checker.component';
 import { DutyLoggerComponent } from './components/duty-logger/duty-logger.component';
+import { HeaderComponent } from './components/header/header.component';
 import { MetricsSummaryComponent } from './components/metrics-summary/metrics-summary.component';
-import { ConfigModalComponent } from './components/config-modal/config-modal.component';
-import { ColleagueModalComponent } from './components/colleague-modal/colleague-modal.component';
 import { TutorialModalComponent } from './components/tutorial-modal/tutorial-modal.component';
-import { ShiftService } from './services/shift.service';
-import { DutySessionStoreService } from './services/duty-session-store.service';
-import { PwaToastContainerComponent } from 'pwa-ui-core/components';
-import { PwaToastService, PwaService } from 'pwa-ui-core/services';
-import { DutyRole } from './models/shift.model';
 import { BeforeInstallPromptEvent } from './models/pwa.model';
+import { DutyRole } from './models/shift.model';
+import { DutySessionStoreService } from './services/duty-session-store.service';
+import { ShiftService } from './services/shift.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule,
     HeaderComponent,
     DutyCheckerComponent,
     DutyLoggerComponent,
