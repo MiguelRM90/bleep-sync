@@ -16,7 +16,7 @@
       <button
         type="button"
         (click)="activeTab.set('timeline')"
-        class="px-4 py-2.5 rounded-xl text-xs font-bold transition tactile-btn cursor-pointer"
+        class="px-4 py-2.5 rounded-xl text-xs font-bold transition tactile-btn cursor-pointer bg-transparent"
         [ngClass]="{
           'bg-emerald-600 text-white shadow-md shadow-emerald-950/50': activeTab() === 'timeline',
           'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60': activeTab() !== 'timeline'
@@ -27,7 +27,7 @@
       <button
         type="button"
         (click)="activeTab.set('balance')"
-        class="px-4 py-2.5 rounded-xl text-xs font-bold transition tactile-btn cursor-pointer"
+        class="px-4 py-2.5 rounded-xl text-xs font-bold transition tactile-btn cursor-pointer bg-transparent"
         [ngClass]="{
           'bg-emerald-600 text-white shadow-md shadow-emerald-950/50': activeTab() === 'balance',
           'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60': activeTab() !== 'balance'

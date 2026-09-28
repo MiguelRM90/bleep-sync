@@ -64,6 +64,19 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* Base button reset */
+button {
+  background-color: transparent;
+  background-image: none;
+  border-style: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Base custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -550,6 +563,7 @@ select option {
 .text-rose-400 { color: #fb7185; }
 
 /* Background Colors */
+.bg-transparent { background-color: transparent; }
 .bg-slate-950 { background-color: #020617; }
 .bg-slate-950\/30 { background-color: rgba(2, 6, 23, 0.3); }
 .bg-slate-950\/40 { background-color: rgba(2, 6, 23, 0.4); }
