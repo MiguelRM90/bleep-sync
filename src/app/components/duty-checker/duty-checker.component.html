@@ -11,16 +11,28 @@
       </div>
     </div>
 
-    <!-- Manage colleagues & history button -->
-    <button
-      type="button"
-      (click)="openColleagueManager.emit()"
-      class="btn-emerald-chip flex items-center gap-1.5 cursor-pointer"
-      title="Gestionar adjuntos e historial previo"
-    >
-      <span>👥</span>
-      <span>Historial Adjuntos</span>
-    </button>
+    <!-- Manage colleagues & history button + Quick Add Toggle -->
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        (click)="toggleAddColleague()"
+        class="btn-emerald-chip flex items-center gap-1 cursor-pointer"
+        [title]="showAddColleagueInput() ? 'Cerrar añadir adjunto' : 'Añadir nuevo adjunto'"
+      >
+        <span class="text-sm font-bold leading-none">{{ showAddColleagueInput() ? '✕' : '+' }}</span>
+        <span class="hidden sm:inline">{{ showAddColleagueInput() ? 'Cancelar' : 'Nuevo' }}</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="openColleagueManager.emit()"
+        class="btn-emerald-chip flex items-center gap-1.5 cursor-pointer"
+        title="Gestionar adjuntos e historial previo"
+      >
+        <span>👥</span>
+        <span>Historial Adjuntos</span>
+      </button>
+    </div>
   </div>
 
   <!-- Quick Add New Colleague Form -->
@@ -45,9 +57,19 @@
 
   <!-- Colleague Selector Dropdown / Pills -->
   <div class="mb-6 flex flex-col gap-2.5">
-    <label for="colleagueSelect" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-      Adjunto de Cirugía
-    </label>
+    <div class="flex items-center justify-between">
+      <label for="colleagueSelect" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+        Adjunto de Cirugía
+      </label>
+      <button
+        type="button"
+        (click)="toggleAddColleague()"
+        class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer flex items-center gap-1 transition"
+        title="Añadir adjunto rápido"
+      >
+        <span>{{ showAddColleagueInput() ? '✕ Cancelar' : '+ Añadir rápido' }}</span>
+      </button>
+    </div>
     <div class="relative">
       <select
         id="colleagueSelect"

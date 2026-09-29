@@ -1,13 +1,14 @@
-import { Injectable, signal, computed, effect, inject } from '@angular/core';
-import { Shift, DutyRole, ColleagueMetrics, Recommendation, AppConfig, SyncStatus } from '../models/shift.model';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { PwaService, PwaToastService } from 'pwa-ui-core/services';
+import { AppConfig, ColleagueMetrics, DutyRole, Recommendation, Shift, SyncStatus } from '../models/shift.model';
+import { formatDutyDate } from '../pipes/date-format.pipe';
+import { DutyMetricsCalculatorService } from './duty-metrics-calculator.service';
+import { DutyRotationCalculatorService } from './duty-rotation-calculator.service';
+import { DutySessionStoreService } from './duty-session-store.service';
 import { GoogleAuthService } from './google-auth.service';
 import { GoogleDriveSyncService } from './google-drive-sync.service';
 import { HapticService } from './haptic.service';
-import { PwaService, PwaToastService } from 'pwa-ui-core/services';
-import { DutyRotationCalculatorService } from './duty-rotation-calculator.service';
-import { DutyMetricsCalculatorService } from './duty-metrics-calculator.service';
 import { ShiftStorageService } from './shift-storage.service';
-import { formatDutyDate } from '../pipes/date-format.pipe';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +22,7 @@ export class ShiftService {
   private readonly rotationCalculator = inject(DutyRotationCalculatorService);
   private readonly metricsCalculator = inject(DutyMetricsCalculatorService);
   private readonly storageService = inject(ShiftStorageService);
+  private readonly sessionStore = inject(DutySessionStoreService);
 
   // Reactive State Signals
   readonly shifts = signal<Shift[]>([]);
@@ -174,6 +176,13 @@ export class ShiftService {
     if (toDeleteIds.length > 0) {
       this.storageService.addDeletedShiftIds(toDeleteIds);
     }
+
+    if (this.sessionStore.activeColleague().trim().toLowerCase() === trimmed) {
+      const remaining = this.colleagues();
+      this.sessionStore.setActiveColleague(remaining.length > 0 ? remaining[0] : '');
+      this.sessionStore.setActiveRole(null);
+    }
+
     this.showToast(`Historial de ${colleagueName} eliminado.`, 'info');
     this.triggerHaptic();
 
@@ -412,6 +421,7 @@ export class ShiftService {
     const allIds = this.shifts().map((s) => s.id);
     this.shifts.set([]);
     this.storageService.clearShifts();
+    this.sessionStore.reset();
     this.triggerHaptic();
 
     if (this.isOnline() && this.googleAuthService.isConnected()) {

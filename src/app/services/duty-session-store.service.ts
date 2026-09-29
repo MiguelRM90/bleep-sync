@@ -68,5 +68,15 @@ export class DutySessionStoreService {
     this.activeRole.set(null);
     this.activeNotes.set('');
   }
+
+  /**
+   * Reset the entire session state to clean initial defaults
+   */
+  reset(): void {
+    this.activeColleague.set('');
+    this.activeRole.set(null);
+    this.activeDate.set(new Date().toISOString().split('T')[0]);
+    this.activeNotes.set('');
+  }
 }
 

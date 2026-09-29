@@ -32,6 +32,7 @@ export class DutyCheckerComponent {
 
   readonly showAddColleagueInput = signal<boolean>(false);
   newColleagueName = '';
+  private readonly manuallyAddedColleague = signal<string | null>(null);
 
   readonly selectedColleague = this.sessionStore.activeColleague;
 
@@ -40,17 +41,30 @@ export class DutyCheckerComponent {
   });
 
   constructor() {
-    // Default to the first colleague in the roster if available and none selected yet
     effect(() => {
       const list = this.shiftService.colleagues();
-      if (list.length > 0 && !this.selectedColleague()) {
-        this.sessionStore.setActiveColleague(list[0]);
-        this.colleagueChange.emit(list[0]);
+      const current = this.selectedColleague();
+
+      if (!current) {
+        this.manuallyAddedColleague.set(null);
+      }
+
+      if (list.length > 0) {
+        if (!current || (!list.includes(current) && current !== this.manuallyAddedColleague())) {
+          this.sessionStore.setActiveColleague(list[0]);
+          this.colleagueChange.emit(list[0]);
+        }
+      } else {
+        if (current && current !== this.manuallyAddedColleague()) {
+          this.sessionStore.setActiveColleague('');
+          this.colleagueChange.emit('');
+        }
       }
     });
   }
 
   onColleagueSelect(colleague: string): void {
+    this.manuallyAddedColleague.set(null);
     this.sessionStore.setActiveColleague(colleague);
     this.colleagueChange.emit(colleague);
     this.hapticService.trigger();
@@ -64,6 +78,7 @@ export class DutyCheckerComponent {
   addNewColleague(): void {
     const trimmed = this.newColleagueName.trim();
     if (trimmed) {
+      this.manuallyAddedColleague.set(trimmed);
       this.sessionStore.setActiveColleague(trimmed);
       this.colleagueChange.emit(trimmed);
       this.showAddColleagueInput.set(false);
