@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ng serve",
+      "type": "shell",
+      "command": "pnpm ng serve",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": {
+            "regexp": "(Building\\.\\.\\.|Compiling\\.\\.\\.|Watch mode enabled)"
+          },
+          "endsPattern": {
+            "regexp": "(Application bundle generation complete|Angular Live Development Server is listening)"
+          }
+        }
+      }
+    }
+  ]
+}
